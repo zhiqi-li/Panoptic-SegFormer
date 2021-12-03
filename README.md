@@ -40,7 +40,7 @@ results on COCO val
 note: PyTorch1.8 has a bug in its [adamw.py](https://github.com/pytorch/pytorch/blob/v1.8.0/torch/optim/adamw.py) and it is solved in PyTorch1.9([see](https://github.com/pytorch/pytorch/blob/master/torch/optim/adamw.py)), you can easily solve it by comparing the difference.
 
 
-### install easy-mmdet
+### install Panoptic SegFormer
 
 ```
 python setup.py install 
@@ -54,7 +54,7 @@ When I began this project, mmdet dose not support panoptic segmentation official
 ### 1. prepare data (COCO)
 
 ```
-cd easy-mmdet
+cd Panoptic-SegFormer
 mkdir datasets
 cd datasets
 ln -s path_to_coco coco
@@ -67,7 +67,7 @@ unzip panoptic_annotations_trainval2017.zip
 Then the directory structure should be the following:
 
 ```
-easy-mmdet
+Panoptic-SegFormer
 ├── datasets
 │   ├── annotations/
 │   │   ├── panoptic_train2017/
@@ -85,14 +85,14 @@ easy-mmdet
 ### 2. convert panoptic format to detection format 
 
 ```
-cd easy-mmdet
+cd Panoptic-SegFormer
 ./tools/convert_panoptic_coco.sh coco
 ```
 
 Then the directory structure should be the following:
 
 ```
-easy-mmdet
+Panoptic-SegFormer
 ├── datasets
 │   ├── annotations/
 │   │   ├── panoptic_train2017/
