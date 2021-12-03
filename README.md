@@ -47,7 +47,7 @@ python setup.py install
 ```
 
 
-## datasets 
+## Datasets 
 
 When I began this project, mmdet dose not support panoptic segmentation officially. I convert the dataset from panoptic segmentation format to instance segmentation format for convenience.
 
