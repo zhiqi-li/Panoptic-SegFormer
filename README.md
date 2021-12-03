@@ -1,6 +1,5 @@
 # Panoptic SegFormer: Delving Deeper into Panoptic Segmentation with Transformers
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/panoptic-segformer/panoptic-segmentation-on-coco-minival)](https://paperswithcode.com/sota/panoptic-segmentation-on-coco-minival?p=panoptic-segformer)
-	
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/panoptic-segformer/panoptic-segmentation-on-coco-test-dev)](https://paperswithcode.com/sota/panoptic-segmentation-on-coco-test-dev?p=panoptic-segformer)
 <div align="center">
   <img src="https://github.com/zhiqi-li/Panoptic-SegFormer/raw/master/figs/arch.png" width="100%" height="100%"/>
