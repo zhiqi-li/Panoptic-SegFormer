@@ -9,11 +9,11 @@
 
 | Backbone | Method | Lr Schd | PQ | Config | Download |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| R-50  | Panoptic-SegFormer | 1x| 48.0 |[config](configs/panformer/panformer_r50_12e_coco_panoptic.py) | [model](https://download.openmmlab.com/mim-example/knet/det/knet/knet_s3_r50_fpn_1x_coco-panoptic/knet_s3_r50_fpn_1x_coco-panoptic_20211017_151750-395fbcba.pth) |
-| R-50  | Panoptic-SegFormer | 2x| 49.6 |[config](configs/panformer/panformer_r50_24e_coco_panoptic.py) | [model](https://download.openmmlab.com/mim-example/knet/det/knet/knet_s3_r50_fpn_ms-3x_coco-panoptic/knet_s3_r50_fpn_ms-3x_coco-panoptic_20211017_054613-4375b8be.pth) |
-| R-101  | Panoptic-SegFormer | 2x| 50.6 |[config](configs/panformer/panformer_r101_12e_coco_panoptic.py) | [model](https://download.openmmlab.com/mim-example/knet/det/knet/knet_s3_r101_fpn_ms-3x_coco-panoptic/knet_s3_r101_fpn_ms-3x_coco-panoptic_20211017_054501-9c600b0c.pth)  |
-| PVTv2-B5  | Panoptic-SegFormer | 2x| 55.6 |[config](configs/panformer/panformer_pvtv2b5_24e_coco_panoptic.py) | [model](https://download.openmmlab.com/mim-example/knet/det/knet/knet_s3_swin-l_fpn_ms-3x_16x2_coco-panoptic/knet_s3_swin-l_fpn_ms-3x_16x2_coco-panoptic_20211020_062341-62f3bbff.pth) |
-| Swin-L (window size 7)  | Panoptic-SegFormer | 2x| 55.8 |[config](configs/panformer/panformer_swinl_24e_coco_panoptic.py) | [model](https://download.openmmlab.com/mim-example/knet/det/knet/knet_s3_swin-l_fpn_ms-3x_16x2_coco-panoptic/knet_s3_swin-l_fpn_ms-3x_16x2_coco-panoptic_20211020_062341-62f3bbff.pth) |
+| R-50  | Panoptic-SegFormer | 1x| 48.0 |[config](configs/panformer/panformer_r50_12e_coco_panoptic.py) | [model](https://github.com/zhiqi-li/Panoptic-SegFormer/releases/download/v1.0/panoptic_segformer_r50_1x.pth) |
+| R-50  | Panoptic-SegFormer | 2x| 49.6 |[config](configs/panformer/panformer_r50_24e_coco_panoptic.py) | [model](https://github.com/zhiqi-li/Panoptic-SegFormer/releases/download/v1.0/panoptic_segformer_r50_2x.pth) |
+| R-101  | Panoptic-SegFormer | 2x| 50.6 |[config](configs/panformer/panformer_r101_12e_coco_panoptic.py) | [model](https://github.com/zhiqi-li/Panoptic-SegFormer/releases/download/v1.0/panoptic_segformer_r101_2x.pth)  |
+| PVTv2-B5  | Panoptic-SegFormer | 2x| 55.6 |[config](configs/panformer/panformer_pvtv2b5_24e_coco_panoptic.py) | [model](https://github.com/zhiqi-li/Panoptic-SegFormer/releases/download/v1.0/panoptic_segformer_pvtv2b5_2x.pth) |
+| Swin-L (window size 7)  | Panoptic-SegFormer | 2x| 55.8 |[config](configs/panformer/panformer_swinl_24e_coco_panoptic.py) | [model](https://github.com/zhiqi-li/Panoptic-SegFormer/releases/download/v1.0/panoptic_segformer_swinl_2x.pth) |
 
 
 
