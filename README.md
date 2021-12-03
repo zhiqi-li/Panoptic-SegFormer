@@ -7,6 +7,8 @@
 
 ## Results
 
+results on COCO val
+
 | Backbone | Method | Lr Schd | PQ | Config | Download |
 | :---: | :---: | :---: | :---: | :---: | :---: |
 | R-50  | Panoptic-SegFormer | 1x| 48.0 |[config](configs/panformer/panformer_r50_12e_coco_panoptic.py) | [model](https://github.com/zhiqi-li/Panoptic-SegFormer/releases/download/v1.0/panoptic_segformer_r50_1x.pth) |
