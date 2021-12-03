@@ -1,0 +1,136 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.txt
+!requirements.txt
+!id.txt
+# C extensions
+*.zip
+*.so
+*.png
+*.jpg
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+val_s/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.out
+*.npy
+*.json
+!panoptic_coco_categories.json
+!panoptic_cityscapes_categories.json
+!panoptic_ade20k_categories.json
+!panoptic_mapilarry_categories.json
+/wandb
+/datasets
+/checkpoints
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+query/
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+
+data/
+data
+.vscode
+.idea
+.DS_Store
+
+# custom
+*.pdf
+*.pkl
+*.pkl.json
+*.log.json
+work_dirs/
+arun_log/
+# Pytorch
+
+*.pth
+*.py~
+*.sh~

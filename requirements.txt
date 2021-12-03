@@ -1,0 +1,11 @@
+mmcv-full==1.3.4
+# mmdet==2.12.0
+torchvision==0.8.2
+timm==0.4.5
+pycocotools
+einops==0.3.0
+Pillow==8.0.1
+opencv-python==4.5.1.48
+cityscapesscripts
+wandb
+seaborn

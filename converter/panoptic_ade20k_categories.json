@@ -1,0 +1,1502 @@
+[
+    {
+        "name": "wall",
+        "id": 0,
+        "isthing": 0,
+        "color": [
+            120,
+            120,
+            120
+        ]
+    },
+    {
+        "name": "building",
+        "id": 1,
+        "isthing": 0,
+        "color": [
+            180,
+            120,
+            120
+        ]
+    },
+    {
+        "name": "sky",
+        "id": 2,
+        "isthing": 0,
+        "color": [
+            6,
+            230,
+            230
+        ]
+    },
+    {
+        "name": "floor",
+        "id": 3,
+        "isthing": 0,
+        "color": [
+            80,
+            50,
+            50
+        ]
+    },
+    {
+        "name": "tree",
+        "id": 4,
+        "isthing": 0,
+        "color": [
+            4,
+            200,
+            3
+        ]
+    },
+    {
+        "name": "ceiling",
+        "id": 5,
+        "isthing": 0,
+        "color": [
+            120,
+            120,
+            80
+        ]
+    },
+    {
+        "name": "road, route",
+        "id": 6,
+        "isthing": 0,
+        "color": [
+            140,
+            140,
+            140
+        ]
+    },
+    {
+        "name": "bed",
+        "id": 7,
+        "isthing": 1,
+        "color": [
+            204,
+            5,
+            255
+        ]
+    },
+    {
+        "name": "window ",
+        "id": 8,
+        "isthing": 1,
+        "color": [
+            230,
+            230,
+            230
+        ]
+    },
+    {
+        "name": "grass",
+        "id": 9,
+        "isthing": 0,
+        "color": [
+            4,
+            250,
+            7
+        ]
+    },
+    {
+        "name": "cabinet",
+        "id": 10,
+        "isthing": 1,
+        "color": [
+            224,
+            5,
+            255
+        ]
+    },
+    {
+        "name": "sidewalk, pavement",
+        "id": 11,
+        "isthing": 0,
+        "color": [
+            235,
+            255,
+            7
+        ]
+    },
+    {
+        "name": "person",
+        "id": 12,
+        "isthing": 1,
+        "color": [
+            150,
+            5,
+            61
+        ]
+    },
+    {
+        "name": "earth, ground",
+        "id": 13,
+        "isthing": 0,
+        "color": [
+            120,
+            120,
+            70
+        ]
+    },
+    {
+        "name": "door",
+        "id": 14,
+        "isthing": 1,
+        "color": [
+            8,
+            255,
+            51
+        ]
+    },
+    {
+        "name": "table",
+        "id": 15,
+        "isthing": 1,
+        "color": [
+            255,
+            6,
+            82
+        ]
+    },
+    {
+        "name": "mountain, mount",
+        "id": 16,
+        "isthing": 0,
+        "color": [
+            143,
+            255,
+            140
+        ]
+    },
+    {
+        "name": "plant",
+        "id": 17,
+        "isthing": 0,
+        "color": [
+            204,
+            255,
+            4
+        ]
+    },
+    {
+        "name": "curtain",
+        "id": 18,
+        "isthing": 1,
+        "color": [
+            255,
+            51,
+            7
+        ]
+    },
+    {
+        "name": "chair",
+        "id": 19,
+        "isthing": 1,
+        "color": [
+            204,
+            70,
+            3
+        ]
+    },
+    {
+        "name": "car",
+        "id": 20,
+        "isthing": 1,
+        "color": [
+            0,
+            102,
+            200
+        ]
+    },
+    {
+        "name": "water",
+        "id": 21,
+        "isthing": 0,
+        "color": [
+            61,
+            230,
+            250
+        ]
+    },
+    {
+        "name": "painting, picture",
+        "id": 22,
+        "isthing": 1,
+        "color": [
+            255,
+            6,
+            51
+        ]
+    },
+    {
+        "name": "sofa",
+        "id": 23,
+        "isthing": 1,
+        "color": [
+            11,
+            102,
+            255
+        ]
+    },
+    {
+        "name": "shelf",
+        "id": 24,
+        "isthing": 1,
+        "color": [
+            255,
+            7,
+            71
+        ]
+    },
+    {
+        "name": "house",
+        "id": 25,
+        "isthing": 0,
+        "color": [
+            255,
+            9,
+            224
+        ]
+    },
+    {
+        "name": "sea",
+        "id": 26,
+        "isthing": 0,
+        "color": [
+            9,
+            7,
+            230
+        ]
+    },
+    {
+        "name": "mirror",
+        "id": 27,
+        "isthing": 1,
+        "color": [
+            220,
+            220,
+            220
+        ]
+    },
+    {
+        "name": "rug",
+        "id": 28,
+        "isthing": 0,
+        "color": [
+            255,
+            9,
+            92
+        ]
+    },
+    {
+        "name": "field",
+        "id": 29,
+        "isthing": 0,
+        "color": [
+            112,
+            9,
+            255
+        ]
+    },
+    {
+        "name": "armchair",
+        "id": 30,
+        "isthing": 1,
+        "color": [
+            8,
+            255,
+            214
+        ]
+    },
+    {
+        "name": "seat",
+        "id": 31,
+        "isthing": 1,
+        "color": [
+            7,
+            255,
+            224
+        ]
+    },
+    {
+        "name": "fence",
+        "id": 32,
+        "isthing": 1,
+        "color": [
+            255,
+            184,
+            6
+        ]
+    },
+    {
+        "name": "desk",
+        "id": 33,
+        "isthing": 1,
+        "color": [
+            10,
+            255,
+            71
+        ]
+    },
+    {
+        "name": "rock, stone",
+        "id": 34,
+        "isthing": 0,
+        "color": [
+            255,
+            41,
+            10
+        ]
+    },
+    {
+        "name": "wardrobe, closet, press",
+        "id": 35,
+        "isthing": 1,
+        "color": [
+            7,
+            255,
+            255
+        ]
+    },
+    {
+        "name": "lamp",
+        "id": 36,
+        "isthing": 1,
+        "color": [
+            224,
+            255,
+            8
+        ]
+    },
+    {
+        "name": "tub",
+        "id": 37,
+        "isthing": 1,
+        "color": [
+            102,
+            8,
+            255
+        ]
+    },
+    {
+        "name": "rail",
+        "id": 38,
+        "isthing": 1,
+        "color": [
+            255,
+            61,
+            6
+        ]
+    },
+    {
+        "name": "cushion",
+        "id": 39,
+        "isthing": 1,
+        "color": [
+            255,
+            194,
+            7
+        ]
+    },
+    {
+        "name": "base, pedestal, stand",
+        "id": 40,
+        "isthing": 0,
+        "color": [
+            255,
+            122,
+            8
+        ]
+    },
+    {
+        "name": "box",
+        "id": 41,
+        "isthing": 1,
+        "color": [
+            0,
+            255,
+            20
+        ]
+    },
+    {
+        "name": "column, pillar",
+        "id": 42,
+        "isthing": 1,
+        "color": [
+            255,
+            8,
+            41
+        ]
+    },
+    {
+        "name": "signboard, sign",
+        "id": 43,
+        "isthing": 1,
+        "color": [
+            255,
+            5,
+            153
+        ]
+    },
+    {
+        "name": "chest of drawers, chest, bureau, dresser",
+        "id": 44,
+        "isthing": 1,
+        "color": [
+            6,
+            51,
+            255
+        ]
+    },
+    {
+        "name": "counter",
+        "id": 45,
+        "isthing": 1,
+        "color": [
+            235,
+            12,
+            255
+        ]
+    },
+    {
+        "name": "sand",
+        "id": 46,
+        "isthing": 0,
+        "color": [
+            160,
+            150,
+            20
+        ]
+    },
+    {
+        "name": "sink",
+        "id": 47,
+        "isthing": 1,
+        "color": [
+            0,
+            163,
+            255
+        ]
+    },
+    {
+        "name": "skyscraper",
+        "id": 48,
+        "isthing": 0,
+        "color": [
+            140,
+            140,
+            200
+        ]
+    },
+    {
+        "name": "fireplace",
+        "id": 49,
+        "isthing": 1,
+        "color": [
+            250,
+            10,
+            15
+        ]
+    },
+    {
+        "name": "refrigerator, icebox",
+        "id": 50,
+        "isthing": 1,
+        "color": [
+            20,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "grandstand, covered stand",
+        "id": 51,
+        "isthing": 0,
+        "color": [
+            31,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "path",
+        "id": 52,
+        "isthing": 0,
+        "color": [
+            255,
+            31,
+            0
+        ]
+    },
+    {
+        "name": "stairs",
+        "id": 53,
+        "isthing": 1,
+        "color": [
+            255,
+            224,
+            0
+        ]
+    },
+    {
+        "name": "runway",
+        "id": 54,
+        "isthing": 0,
+        "color": [
+            153,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "case, display case, showcase, vitrine",
+        "id": 55,
+        "isthing": 1,
+        "color": [
+            0,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "pool table, billiard table, snooker table",
+        "id": 56,
+        "isthing": 1,
+        "color": [
+            255,
+            71,
+            0
+        ]
+    },
+    {
+        "name": "pillow",
+        "id": 57,
+        "isthing": 1,
+        "color": [
+            0,
+            235,
+            255
+        ]
+    },
+    {
+        "name": "screen door, screen",
+        "id": 58,
+        "isthing": 1,
+        "color": [
+            0,
+            173,
+            255
+        ]
+    },
+    {
+        "name": "stairway, staircase",
+        "id": 59,
+        "isthing": 0,
+        "color": [
+            31,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "river",
+        "id": 60,
+        "isthing": 0,
+        "color": [
+            11,
+            200,
+            200
+        ]
+    },
+    {
+        "name": "bridge, span",
+        "id": 61,
+        "isthing": 0,
+        "color": [
+            255,
+            82,
+            0
+        ]
+    },
+    {
+        "name": "bookcase",
+        "id": 62,
+        "isthing": 1,
+        "color": [
+            0,
+            255,
+            245
+        ]
+    },
+    {
+        "name": "blind, screen",
+        "id": 63,
+        "isthing": 0,
+        "color": [
+            0,
+            61,
+            255
+        ]
+    },
+    {
+        "name": "coffee table",
+        "id": 64,
+        "isthing": 1,
+        "color": [
+            0,
+            255,
+            112
+        ]
+    },
+    {
+        "name": "toilet, can, commode, crapper, pot, potty, stool, throne",
+        "id": 65,
+        "isthing": 1,
+        "color": [
+            0,
+            255,
+            133
+        ]
+    },
+    {
+        "name": "flower",
+        "id": 66,
+        "isthing": 1,
+        "color": [
+            255,
+            0,
+            0
+        ]
+    },
+    {
+        "name": "book",
+        "id": 67,
+        "isthing": 1,
+        "color": [
+            255,
+            163,
+            0
+        ]
+    },
+    {
+        "name": "hill",
+        "id": 68,
+        "isthing": 0,
+        "color": [
+            255,
+            102,
+            0
+        ]
+    },
+    {
+        "name": "bench",
+        "id": 69,
+        "isthing": 1,
+        "color": [
+            194,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "countertop",
+        "id": 70,
+        "isthing": 1,
+        "color": [
+            0,
+            143,
+            255
+        ]
+    },
+    {
+        "name": "stove",
+        "id": 71,
+        "isthing": 1,
+        "color": [
+            51,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "palm, palm tree",
+        "id": 72,
+        "isthing": 1,
+        "color": [
+            0,
+            82,
+            255
+        ]
+    },
+    {
+        "name": "kitchen island",
+        "id": 73,
+        "isthing": 1,
+        "color": [
+            0,
+            255,
+            41
+        ]
+    },
+    {
+        "name": "computer",
+        "id": 74,
+        "isthing": 1,
+        "color": [
+            0,
+            255,
+            173
+        ]
+    },
+    {
+        "name": "swivel chair",
+        "id": 75,
+        "isthing": 1,
+        "color": [
+            10,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "boat",
+        "id": 76,
+        "isthing": 1,
+        "color": [
+            173,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "bar",
+        "id": 77,
+        "isthing": 0,
+        "color": [
+            0,
+            255,
+            153
+        ]
+    },
+    {
+        "name": "arcade machine",
+        "id": 78,
+        "isthing": 1,
+        "color": [
+            255,
+            92,
+            0
+        ]
+    },
+    {
+        "name": "hovel, hut, hutch, shack, shanty",
+        "id": 79,
+        "isthing": 0,
+        "color": [
+            255,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "bus",
+        "id": 80,
+        "isthing": 1,
+        "color": [
+            255,
+            0,
+            245
+        ]
+    },
+    {
+        "name": "towel",
+        "id": 81,
+        "isthing": 1,
+        "color": [
+            255,
+            0,
+            102
+        ]
+    },
+    {
+        "name": "light",
+        "id": 82,
+        "isthing": 1,
+        "color": [
+            255,
+            173,
+            0
+        ]
+    },
+    {
+        "name": "truck",
+        "id": 83,
+        "isthing": 1,
+        "color": [
+            255,
+            0,
+            20
+        ]
+    },
+    {
+        "name": "tower",
+        "id": 84,
+        "isthing": 0,
+        "color": [
+            255,
+            184,
+            184
+        ]
+    },
+    {
+        "name": "chandelier",
+        "id": 85,
+        "isthing": 1,
+        "color": [
+            0,
+            31,
+            255
+        ]
+    },
+    {
+        "name": "awning, sunshade, sunblind",
+        "id": 86,
+        "isthing": 1,
+        "color": [
+            0,
+            255,
+            61
+        ]
+    },
+    {
+        "name": "street lamp",
+        "id": 87,
+        "isthing": 1,
+        "color": [
+            0,
+            71,
+            255
+        ]
+    },
+    {
+        "name": "booth",
+        "id": 88,
+        "isthing": 1,
+        "color": [
+            255,
+            0,
+            204
+        ]
+    },
+    {
+        "name": "tv",
+        "id": 89,
+        "isthing": 1,
+        "color": [
+            0,
+            255,
+            194
+        ]
+    },
+    {
+        "name": "plane",
+        "id": 90,
+        "isthing": 1,
+        "color": [
+            0,
+            255,
+            82
+        ]
+    },
+    {
+        "name": "dirt track",
+        "id": 91,
+        "isthing": 0,
+        "color": [
+            0,
+            10,
+            255
+        ]
+    },
+    {
+        "name": "clothes",
+        "id": 92,
+        "isthing": 1,
+        "color": [
+            0,
+            112,
+            255
+        ]
+    },
+    {
+        "name": "pole",
+        "id": 93,
+        "isthing": 1,
+        "color": [
+            51,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "land, ground, soil",
+        "id": 94,
+        "isthing": 0,
+        "color": [
+            0,
+            194,
+            255
+        ]
+    },
+    {
+        "name": "bannister, banister, balustrade, balusters, handrail",
+        "id": 95,
+        "isthing": 1,
+        "color": [
+            0,
+            122,
+            255
+        ]
+    },
+    {
+        "name": "escalator, moving staircase, moving stairway",
+        "id": 96,
+        "isthing": 0,
+        "color": [
+            0,
+            255,
+            163
+        ]
+    },
+    {
+        "name": "ottoman, pouf, pouffe, puff, hassock",
+        "id": 97,
+        "isthing": 1,
+        "color": [
+            255,
+            153,
+            0
+        ]
+    },
+    {
+        "name": "bottle",
+        "id": 98,
+        "isthing": 1,
+        "color": [
+            0,
+            255,
+            10
+        ]
+    },
+    {
+        "name": "buffet, counter, sideboard",
+        "id": 99,
+        "isthing": 0,
+        "color": [
+            255,
+            112,
+            0
+        ]
+    },
+    {
+        "name": "poster, posting, placard, notice, bill, card",
+        "id": 100,
+        "isthing": 0,
+        "color": [
+            143,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "stage",
+        "id": 101,
+        "isthing": 0,
+        "color": [
+            82,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "van",
+        "id": 102,
+        "isthing": 1,
+        "color": [
+            163,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "ship",
+        "id": 103,
+        "isthing": 1,
+        "color": [
+            255,
+            235,
+            0
+        ]
+    },
+    {
+        "name": "fountain",
+        "id": 104,
+        "isthing": 1,
+        "color": [
+            8,
+            184,
+            170
+        ]
+    },
+    {
+        "name": "conveyer belt, conveyor belt, conveyer, conveyor, transporter",
+        "id": 105,
+        "isthing": 0,
+        "color": [
+            133,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "canopy",
+        "id": 106,
+        "isthing": 0,
+        "color": [
+            0,
+            255,
+            92
+        ]
+    },
+    {
+        "name": "washer, automatic washer, washing machine",
+        "id": 107,
+        "isthing": 1,
+        "color": [
+            184,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "plaything, toy",
+        "id": 108,
+        "isthing": 1,
+        "color": [
+            255,
+            0,
+            31
+        ]
+    },
+    {
+        "name": "pool",
+        "id": 109,
+        "isthing": 0,
+        "color": [
+            0,
+            184,
+            255
+        ]
+    },
+    {
+        "name": "stool",
+        "id": 110,
+        "isthing": 1,
+        "color": [
+            0,
+            214,
+            255
+        ]
+    },
+    {
+        "name": "barrel, cask",
+        "id": 111,
+        "isthing": 1,
+        "color": [
+            255,
+            0,
+            112
+        ]
+    },
+    {
+        "name": "basket, handbasket",
+        "id": 112,
+        "isthing": 1,
+        "color": [
+            92,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "falls",
+        "id": 113,
+        "isthing": 0,
+        "color": [
+            0,
+            224,
+            255
+        ]
+    },
+    {
+        "name": "tent",
+        "id": 114,
+        "isthing": 0,
+        "color": [
+            112,
+            224,
+            255
+        ]
+    },
+    {
+        "name": "bag",
+        "id": 115,
+        "isthing": 1,
+        "color": [
+            70,
+            184,
+            160
+        ]
+    },
+    {
+        "name": "minibike, motorbike",
+        "id": 116,
+        "isthing": 1,
+        "color": [
+            163,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "cradle",
+        "id": 117,
+        "isthing": 0,
+        "color": [
+            153,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "oven",
+        "id": 118,
+        "isthing": 1,
+        "color": [
+            71,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "ball",
+        "id": 119,
+        "isthing": 1,
+        "color": [
+            255,
+            0,
+            163
+        ]
+    },
+    {
+        "name": "food, solid food",
+        "id": 120,
+        "isthing": 1,
+        "color": [
+            255,
+            204,
+            0
+        ]
+    },
+    {
+        "name": "step, stair",
+        "id": 121,
+        "isthing": 1,
+        "color": [
+            255,
+            0,
+            143
+        ]
+    },
+    {
+        "name": "tank, storage tank",
+        "id": 122,
+        "isthing": 0,
+        "color": [
+            0,
+            255,
+            235
+        ]
+    },
+    {
+        "name": "trade name",
+        "id": 123,
+        "isthing": 1,
+        "color": [
+            133,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "microwave",
+        "id": 124,
+        "isthing": 1,
+        "color": [
+            255,
+            0,
+            235
+        ]
+    },
+    {
+        "name": "pot",
+        "id": 125,
+        "isthing": 1,
+        "color": [
+            245,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "animal",
+        "id": 126,
+        "isthing": 1,
+        "color": [
+            255,
+            0,
+            122
+        ]
+    },
+    {
+        "name": "bicycle",
+        "id": 127,
+        "isthing": 1,
+        "color": [
+            255,
+            245,
+            0
+        ]
+    },
+    {
+        "name": "lake",
+        "id": 128,
+        "isthing": 0,
+        "color": [
+            10,
+            190,
+            212
+        ]
+    },
+    {
+        "name": "dishwasher",
+        "id": 129,
+        "isthing": 1,
+        "color": [
+            214,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "screen",
+        "id": 130,
+        "isthing": 1,
+        "color": [
+            0,
+            204,
+            255
+        ]
+    },
+    {
+        "name": "blanket, cover",
+        "id": 131,
+        "isthing": 0,
+        "color": [
+            20,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "sculpture",
+        "id": 132,
+        "isthing": 1,
+        "color": [
+            255,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "hood, exhaust hood",
+        "id": 133,
+        "isthing": 1,
+        "color": [
+            0,
+            153,
+            255
+        ]
+    },
+    {
+        "name": "sconce",
+        "id": 134,
+        "isthing": 1,
+        "color": [
+            0,
+            41,
+            255
+        ]
+    },
+    {
+        "name": "vase",
+        "id": 135,
+        "isthing": 1,
+        "color": [
+            0,
+            255,
+            204
+        ]
+    },
+    {
+        "name": "traffic light",
+        "id": 136,
+        "isthing": 1,
+        "color": [
+            41,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "tray",
+        "id": 137,
+        "isthing": 1,
+        "color": [
+            41,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "trash can",
+        "id": 138,
+        "isthing": 1,
+        "color": [
+            173,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "fan",
+        "id": 139,
+        "isthing": 1,
+        "color": [
+            0,
+            245,
+            255
+        ]
+    },
+    {
+        "name": "pier",
+        "id": 140,
+        "isthing": 0,
+        "color": [
+            71,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "crt screen",
+        "id": 141,
+        "isthing": 0,
+        "color": [
+            122,
+            0,
+            255
+        ]
+    },
+    {
+        "name": "plate",
+        "id": 142,
+        "isthing": 1,
+        "color": [
+            0,
+            255,
+            184
+        ]
+    },
+    {
+        "name": "monitor",
+        "id": 143,
+        "isthing": 1,
+        "color": [
+            0,
+            92,
+            255
+        ]
+    },
+    {
+        "name": "bulletin board",
+        "id": 144,
+        "isthing": 1,
+        "color": [
+            184,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "shower",
+        "id": 145,
+        "isthing": 0,
+        "color": [
+            0,
+            133,
+            255
+        ]
+    },
+    {
+        "name": "radiator",
+        "id": 146,
+        "isthing": 1,
+        "color": [
+            255,
+            214,
+            0
+        ]
+    },
+    {
+        "name": "glass, drinking glass",
+        "id": 147,
+        "isthing": 1,
+        "color": [
+            25,
+            194,
+            194
+        ]
+    },
+    {
+        "name": "clock",
+        "id": 148,
+        "isthing": 1,
+        "color": [
+            102,
+            255,
+            0
+        ]
+    },
+    {
+        "name": "flag",
+        "id": 149,
+        "isthing": 1,
+        "color": [
+            92,
+            0,
+            255
+        ]
+    }
+]
