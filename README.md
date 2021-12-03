@@ -152,5 +152,6 @@ If you find the code useful, please also consider the following BibTeX entry.
 ## Acknowledgement
 
 Mainly based on [Defromable DETR](https://github.com/open-mmlab/mmdetection.git). 
-Thanks very much for other open source work: [timm](https://github.com/rwightman/pytorch-image-models), [MaskFomer](https://github.com/facebookresearch/MaskFormer)
+
+Thanks very much for other open source work: [timm](https://github.com/rwightman/pytorch-image-models), [Panoptic FCN](https://github.com/dvlab-research/PanopticFCN)[MaskFomer](https://github.com/facebookresearch/MaskFormer)
 
