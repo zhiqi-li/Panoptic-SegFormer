@@ -18,7 +18,7 @@
 
 
 
-## install
+## Install
 
 ###  Prerequisites
 
@@ -108,7 +108,7 @@ easy-mmdet
 ```
 
 
-## RUN (panoptic segmentation)
+## Run (panoptic segmentation)
 
 ### Train 
 
