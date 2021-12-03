@@ -145,5 +145,5 @@ If you use Panoptic SegFormer in your research, please use the following BibTeX 
 
 Mainly based on [Defromable DETR](https://github.com/open-mmlab/mmdetection.git). 
 
-Thanks very much for other open source work: [timm](https://github.com/rwightman/pytorch-image-models), [Panoptic FCN](https://github.com/dvlab-research/PanopticFCN), [MaskFomer](https://github.com/facebookresearch/MaskFormer)
+Thanks very much for other open source works: [timm](https://github.com/rwightman/pytorch-image-models), [Panoptic FCN](https://github.com/dvlab-research/PanopticFCN), [MaskFomer](https://github.com/facebookresearch/MaskFormer), [QueryInst](https://github.com/hustvl/QueryInst)
 
