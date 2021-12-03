@@ -112,7 +112,7 @@ Panoptic-SegFormer
 
 ## Run (panoptic segmentation)
 
-### Train 
+### train 
 
 single-machine with 8 gpus.
 
