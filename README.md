@@ -1,5 +1,10 @@
 # Panoptic SegFormer: Delving Deeper into Panoptic Segmentation with Transformers
 
+
+<div align="center">
+  <img src="https://github.com/zhiqi-li/Panoptic-SegFormer/raw/master/figs/arch.png" width="100%" height="100%"/>
+</div><br/>
+
 ## Results
 
 | Backbone | Method | Lr Schd | PQ | Config | Download |
