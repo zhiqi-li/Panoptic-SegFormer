@@ -1,4 +1,4 @@
-# Panoptic SegFormer
+# Panoptic SegFormer: Delving Deeper into Panoptic Segmentation with Transformers
 
 ## Results
 
