@@ -125,8 +125,32 @@ single-machine with 8 gpus.
 ./tools/dist_test.sh ./configs/panformer/panformer_r50_24e_coco_panoptic.py path/to/model.pth 8
 ```
 
+## <a name="CitingMask2Former"></a>Citing Mask2Former
 
-## Notes
+If you use Mask2Former in your research or wish to refer to the baseline results published in the [Model Zoo](MODEL_ZOO.md), please use the following BibTeX entry.
 
+```BibTeX
+@article{cheng2021mask2former,
+  title={Masked-attention Mask Transformer for Universal Image Segmentation},
+  author={Bowen Cheng and Ishan Misra and Alexander G. Schwing and Alexander Kirillov and Rohit Girdhar},
+  journal={arXiv},
+  year={2021}
+}
+```
 
+If you find the code useful, please also consider the following BibTeX entry.
+
+```BibTeX
+@inproceedings{cheng2021maskformer,
+  title={Per-Pixel Classification is Not All You Need for Semantic Segmentation},
+  author={Bowen Cheng and Alexander G. Schwing and Alexander Kirillov},
+  journal={NeurIPS},
+  year={2021}
+}
+```
+
+## Acknowledgement
+
+Mainly based on [Defromable DETR](https://github.com/open-mmlab/mmdetection.git). 
+Thanks very much for other open source work: [timm](https://github.com/rwightman/pytorch-image-models), [MaskFomer](https://github.com/facebookresearch/MaskFormer)
 
