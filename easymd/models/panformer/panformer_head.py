@@ -1230,10 +1230,10 @@ class PanformerHead(DETRHeadv2):
             labels_list.append(labels_th)
             seg_list.append(seg_th)
 
-        resutls = {
+        results = {
             'bbox': bbox_list,
             'segm': seg_list,
             'labels': labels_list,
             'panoptic': panoptic_list
         }
-        return resutls
+        return results
