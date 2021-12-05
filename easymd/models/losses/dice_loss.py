@@ -71,51 +71,6 @@ def l1_loss(pred, target):
 
 
 
-@LOSSES.register_module()
-class DiceLoss_with_center_loss(nn.Module):
-
-    def __init__(self, eps=1e-6, reduction='mean', loss_weight=1.0):
-        super(DiceLoss_with_center_loss, self).__init__()
-        self.eps = eps
-        self.reduction = reduction
-        self.loss_weight = loss_weight
-        self.count = 0
-    def forward(self,
-                pred,
-                target,
-                mask=None,
-                weight=None,
-                avg_factor=None,
-                reduction_override=None,
-                **kwargs):
-       
-        assert reduction_override in (None, 'none', 'mean', 'sum')
-        reduction = (
-            reduction_override if reduction_override else self.reduction)
-        if weight is not None and weight.dim() > 1:
-            # TODO: remove this in the future
-            # reduce the weight of shape (n,w,h) to (n,) to match the
-            # giou_loss of shape (n,)
-            assert weight.shape == pred.shape
-            weight = weight.mean((-2,-1))
-        loss = self.loss_weight * dice_loss(
-            pred,
-            target,
-            weight,
-            mask=mask,
-            eps=self.eps,
-            reduction=reduction,
-            avg_factor=avg_factor,
-            **kwargs)
-        center_p = center_of_mass(pred)
-        center_g = center_of_mass(target)
-        center_loss = self.loss_weight*l1_loss(
-            center_p,center_g,weight,reduction=reduction,
-            avg_factor=avg_factor,
-            **kwargs
-        )
-        #print('DiceLoss',loss, avg_factor)
-        return loss+center_loss
 
 @LOSSES.register_module()
 class DiceLoss(nn.Module):
@@ -134,17 +89,7 @@ class DiceLoss(nn.Module):
                 avg_factor=None,
                 reduction_override=None,
                 **kwargs):
-        #print('pred',pred.shape)
-        #print('target',target.shape)
-        #print('weight',weight.shape)
-        #save_tensor(pred,'{i}_pred.png'.format(i=self.count))
-        #save_tensor(target,'{i}_target.png'.format(i=self.count))
-        #save_tensor(weight,'{i}_weight.png'.format(i=self.count))
-        #self.count +=1
-        #if weight is not None and not torch.any(weight > 0):
-        #    if pred.dim() == weight.dim() + 1:
-        #        weight = weight.unsqueeze(1)
-        #    return (pred * weight).sum()  # 0
+
         assert reduction_override in (None, 'none', 'mean', 'sum')
         reduction = (
             reduction_override if reduction_override else self.reduction)
@@ -165,51 +110,7 @@ class DiceLoss(nn.Module):
             **kwargs)
         #print('DiceLoss',loss, avg_factor)
         return loss
-@LOSSES.register_module()
-class CenterLoss(nn.Module):
 
-    def __init__(self, eps=1e-6, reduction='mean', loss_weight=1.0):
-        super(CenterLoss, self).__init__()
-        self.eps = eps
-        self.reduction = reduction
-        self.loss_weight = loss_weight
-        self.count = 0
-    def forward(self,
-                pred,
-                target,
-                weight=None,
-                avg_factor=None,
-                reduction_override=None,
-                **kwargs):
-        #print('pred',pred.shape)
-        #print('target',target.shape)
-        #print('weight',weight.shape)
-        #save_tensor(pred,'{i}_pred.png'.format(i=self.count))
-        #save_tensor(target,'{i}_target.png'.format(i=self.count))
-        #save_tensor(weight,'{i}_weight.png'.format(i=self.count))
-        #self.count +=1
-        #if weight is not None and not torch.any(weight > 0):
-        #    if pred.dim() == weight.dim() + 1:
-        #        weight = weight.unsqueeze(1)
-        #    return (pred * weight).sum()  # 0
-        assert reduction_override in (None, 'none', 'mean', 'sum')
-        reduction = (
-            reduction_override if reduction_override else self.reduction)
-        #if weight is not None and weight.dim() > 1:
-            # TODO: remove this in the future
-            # reduce the weight of shape (n,w,h) to (n,) to match the
-            # giou_loss of shape (n,)
-            #assert weight.shape == pred.shape
-            #weight = weight.mean((-2,-1))
-        center_p = center_of_mass(pred)
-        center_g = center_of_mass(target)
-        center_loss = self.loss_weight*l1_loss(
-            center_p,center_g,weight,reduction=reduction,
-            avg_factor=avg_factor,
-            **kwargs
-        )
-        #print('DiceLoss',loss, avg_factor)
-        return center_loss
 
 
 @LOSSES.register_module()

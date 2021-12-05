@@ -2,7 +2,7 @@ _base_ = './base.py'
 _dim_ = 256
 _num_levels_=4
 model = dict(
-    type='TIS_plus',
+    type='PanSeg',
     # get swin-large
     #import os
     #import torch
