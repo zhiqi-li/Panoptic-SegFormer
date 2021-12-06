@@ -5,7 +5,7 @@
   <img src="https://github.com/zhiqi-li/Panoptic-SegFormer/raw/master/figs/arch.png" width="100%" height="100%"/>
 </div><br/>
 
-[arXiv](https://arxiv.org/abs/2109.03814)
+We update our latest paper on [arXiv](https://arxiv.org/abs/2109.03814)
 
 
 ## Results
