@@ -135,11 +135,13 @@ single-machine with 8 gpus.
 If you use Panoptic SegFormer in your research, please use the following BibTeX entry.
 
 ```BibTeX
-@article{li2021panoptic,
-  title={Panoptic SegFormer},
-  author={Li, Zhiqi and Wang, Wenhai and Xie, Enze and Yu, Zhiding and Anandkumar, Anima and Alvarez, Jose M and Lu, Tong and Luo, Ping},
-  journal={arXiv},
-  year={2021}
+@misc{li2021panoptic,
+      title={Panoptic SegFormer: Delving Deeper into Panoptic Segmentation with Transformers}, 
+      author={Zhiqi Li and Wenhai Wang and Enze Xie and Zhiding Yu and Anima Anandkumar and Jose M. Alvarez and Tong Lu and Ping Luo},
+      year={2021},
+      eprint={2109.03814},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
 }
 ```
 
