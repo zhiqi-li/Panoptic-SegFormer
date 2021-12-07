@@ -35,4 +35,8 @@ model = dict(
         act_cfg=None,
         norm_cfg=dict(type='GN', num_groups=32),
         num_outs=_num_levels_),
+    bbox_head=dict(
+        thre1=0.3,
+        thre2=0.3,
+    )
 )
