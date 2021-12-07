@@ -13,4 +13,8 @@ model = dict(
         type='ChannelMapper',
         in_channels=[128, 320, 512], 
      ),
+    bbox_head=dict(
+        thre1=0.3,
+        thre2=0.3,
+    )
 )
