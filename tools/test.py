@@ -9,11 +9,11 @@ import os.path as osp
 from mmcv import Config, DictAction
 from mmcv.cnn import fuse_conv_bn
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
-from mmcv.runner import (get_dist_info, init_dist, load_checkpoint,
+from mmcv.runner import (get_dist_info, init_dist, 
                          wrap_fp16_model)
-
+from easymd.runner.checkpoints import load_checkpoint
 from mmdet.apis import multi_gpu_test, single_gpu_test
-from easymd.apis import multi_gpu_test_plus,single_gpu_test_plus,multi_gpu_test_plus2
+from easymd.apis import single_gpu_test_plus,multi_gpu_test_plus
 from mmdet.datasets import (build_dataloader, build_dataset,
                             replace_ImageToTensor)
 from mmdet.models import build_detector
@@ -207,7 +207,7 @@ def main(extra_args=None):
             broadcast_buffers=False)
         segmentations_folder = cfg.data.test.segmentations_folder
         datasets = cfg.model.bbox_head.get('datasets','coco')
-        outputs = multi_gpu_test_plus2(model, data_loader,datasets,segmentations_folder, args.tmpdir,
+        outputs = multi_gpu_test_plus(model, data_loader,datasets,segmentations_folder, args.tmpdir,
                                  args.gpu_collect)
 
     rank, _ = get_dist_info()
@@ -234,71 +234,8 @@ def main(extra_args=None):
             print(eval_kwargs)
             results = dataset.evaluate(outputs, **eval_kwargs)
             print(results)
-            '''
-            try:
-                import wandb
-                config = {
-                    'learning_rate': cfg.optimizer.lr,
-                    'epoch':cfg.runner.max_epochs,
-                    'backbone':cfg.model.backbone.type,
-                    'depth': cfg.model.backbone.get('depth','0'),
-                    'bbox_head': cfg.model.bbox_head.type,
-                    'num_query':cfg.model.bbox_head.num_query,
-                    'transformer_head':cfg.model.bbox_head.transformer_head.type,
-                    #'thre1': cfg.model.bbox_head.thre1,
-                    #'thre2': cfg.model.bbox_head.thre2,
-                }
-                init_flag = False
-                for kwarags in cfg.log_config.hooks:
-                    if kwarags['type'] == 'WandbLoggerHook':
-                        init_flag=True
-                        wandb.init(config=config, **kwarags['init_kwargs'])
-                        break
-                if not init_flag:
-                    wandb.init(config=config)
-                tables = {}
-                if 'All' in results.keys():
-                    wandb_key_pano = ['type', 'pq','sq','rq']
-                    wandb_data_pano = []
-                    for key in {'All','Things','Stuff'}:
-                        wandb_data_pano.append([key,results[key]['pq'],results[key]['sq'],results[key]['rq']])
-                    table_panoptic = wandb.Table(data=wandb_data_pano,columns=wandb_key_pano)
-                    tables['panptic'] = table_panoptic
-                wandb_key = ['type','mAP','mAP_50','mAP_75','mAP_s','mAP_m','mAP_l']
-                wandb_data = []
-                for key in {'segm','bbox'}:
-                    if  (key+'_mAP') in results.keys():
-                        data = [key]
-                        data.extend([results[key+'_'+each] for each in wandb_key[1:]])
-                        wandb_data.append(data)
-                if wandb_data !=[]:
-                    det_table = wandb.Table(data=wandb_data,columns=wandb_key)
-                    tables['det'] = det_table
-                if tables !={}:
-                    wandb.log(tables)
-                wandb.join()
-            except ImportError:
-                print('Wandb not install')
-            '''
+
 
 if __name__ == '__main__':
     main()
-    '''
-    for thre1 in range(2,6,1):
-        thre1/=10
-        for thre2 in range(2,6,1):
-            thre2/=10
-            for use_argmax in [False]:
-                for t1 in range(25,31,1):
-                    t1/=100
-                    for t2 in range(22,28,2):
-                        t2 /=100
-                        main(extra_args = 
-                        {
-                            'model.bbox_head.overlap_threshold1':thre1,
-                            'model.bbox_head.thre1':t1,
-                            'model.bbox_head.thre2':t2,
-                            'model.bbox_head.overlap_threshold2':thre2,
-                            'model.bbox_head.use_argmax':use_argmax})
-                        print(' thre1 ',thre1,' thre2 ',thre2, 't1',t1,'t2',t2, ' use_argmax ',use_argmax)
-    '''
+   

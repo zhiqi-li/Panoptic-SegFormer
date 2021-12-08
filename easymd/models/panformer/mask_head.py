@@ -4,18 +4,13 @@ Copy-paste from torch.nn.Transformer, timm, with modifications:
 import copy
 from typing import Optional, List
 
-from numpy.ma.core import dot, masked_values
-
 import torch
 import torch.nn.functional as F
 from torch import nn, Tensor
 from functools import partial
 from mmdet.models.utils.builder import TRANSFORMER
 import math
-#=====
 from mmcv.runner import force_fp32
-from timm.models.layers import DropPath, to_2tuple, trunc_normal_
-from easymd.models.utils.visual import save_tensor
 
 count = 0
 

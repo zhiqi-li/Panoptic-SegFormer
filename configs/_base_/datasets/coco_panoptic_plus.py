@@ -1,5 +1,5 @@
 # dataset settings
-dataset_type = 'CocoDataset_plus2'
+dataset_type = 'CocoDataset_plus'
 data_root = 'datasets/coco/'
 coco_root = 'datasets/'
 img_norm_cfg = dict(
@@ -38,10 +38,7 @@ data = dict(
         img_prefix=data_root + 'train2017/',
         pipeline=train_pipeline),
     val=dict( 
-        img_info_file_folder = './datasets/annotations/panoptic_val2017_detection_format.json',
-        #img_info_file_folder = './datasets/coco/annotations/image_info_test-dev2017.json',
-        output_folder = 'seg',
-        pred_json = 'pred.json',
+      
         segmentations_folder='./seg',
         gt_json = './datasets/annotations/panoptic_val2017.json',
         gt_folder = './datasets/annotations/panoptic_val2017',
@@ -50,10 +47,6 @@ data = dict(
         img_prefix=data_root + 'val2017/',
         pipeline=test_pipeline),
     test=dict(
-        #img_info_file_folder = './datasets/coco/annotations/image_info_test-dev2017.json',
-        img_info_file_folder = './datasets/annotations/panoptic_val2017_detection_format.json',
-        output_folder = 'seg',
-        pred_json = 'pred.json',
         segmentations_folder='./seg',
         gt_json = './datasets/annotations/panoptic_val2017.json',
         gt_folder = './datasets/annotations/panoptic_val2017',

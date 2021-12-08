@@ -46,10 +46,10 @@ def convert_single_core(proc_id, image_set, categories,  segmentations_folder, V
             original_format = panoptic_result
         except IOError:
             raise KeyError('no prediction png file for id')
-        pan = OFFSET * original_format[:, :, 0] + original_format[:, :, 1]
+        id_and_category_maps = OFFSET * original_format[:, :, 0] + original_format[:, :, 1]
         pan_format = np.zeros((original_format.shape[0], original_format.shape[1], 3), dtype=np.uint8)
         id_generator = IdGenerator(categories)
-        l = np.unique(pan)
+        l = np.unique(id_and_category_maps)
         segm_info = []
         for el in l:
             sem = el // OFFSET
@@ -57,7 +57,7 @@ def convert_single_core(proc_id, image_set, categories,  segmentations_folder, V
                 continue
             if sem not in categories:
                 raise KeyError('Unknown semantic label {}'.format(sem))
-            mask = pan == el
+            mask = id_and_category_maps == el
             segment_id, color = id_generator.get_id_and_color(sem)
             pan_format[mask] = color
             segm_info.append({"id": segment_id,
@@ -141,10 +141,10 @@ def convert_single_core_naive(proc_id, image_set, categories, source_folder, seg
         except IOError:
             raise KeyError('no prediction png file for id: {}'.format(image_info['id']))
         
-        pan = OFFSET * original_format[:, :, 2] + original_format[:, :, 1]
+        id_and_category_maps = OFFSET * original_format[:, :, 2] + original_format[:, :, 1]
         pan_format = np.zeros((original_format.shape[0], original_format.shape[1], 3), dtype=np.uint8)
         id_generator = IdGenerator(categories)
-        l = np.unique(pan)
+        l = np.unique(id_and_category_maps)
         segm_info = []
         for el in l:
             sem = el // OFFSET
@@ -152,7 +152,7 @@ def convert_single_core_naive(proc_id, image_set, categories, source_folder, seg
                 continue
             if sem not in categories:
                 raise KeyError('Unknown semantic label {}'.format(sem))
-            mask = pan == el
+            mask = id_and_category_maps == el
             segment_id, color = id_generator.get_id_and_color(sem)
             pan_format[mask] = color
             segm_info.append({"id": segment_id,

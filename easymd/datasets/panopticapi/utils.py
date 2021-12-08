@@ -113,9 +113,9 @@ def mask_to_boundary(mask, dilation_ratio=0.02):
     if dilation < 1:
         dilation = 1
     # Pad image so mask truncated by the image border is also considered as boundary.
-    new_mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)
+    newith_mask = cv2.copyMakeBorder(mask, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)
     kernel = np.ones((3, 3), dtype=np.uint8)
-    new_mask_erode = cv2.erode(new_mask, kernel, iterations=dilation)
-    mask_erode = new_mask_erode[1 : h + 1, 1 : w + 1]
+    newith_mask_erode = cv2.erode(newith_mask, kernel, iterations=dilation)
+    mask_erode = newith_mask_erode[1 : h + 1, 1 : w + 1]
     # G_d intersects G in the paper.
     return mask - mask_erode

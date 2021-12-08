@@ -15,7 +15,7 @@ from mmdet.core import eval_recalls
 from mmdet.datasets.api_wrappers import COCO, COCOeval
 from mmdet.datasets.builder import DATASETS
 from mmdet.datasets.custom import CustomDataset
-from easymd.datasets.panopticapi import pq_compute
+from easymd.datasets.panopticapi import pq_compute2
 from easymd.datasets.panopticapi import converter
 
 @DATASETS.register_module()
@@ -47,19 +47,13 @@ class CocoDataset_plus(CustomDataset):
         'building-other-merged', 'rock-merged', 'wall-other-merged', 'rug-merged']
   
     def __init__(self,
-           
-            img_info_file_folder = './datasets/panoptic_val2017_detection_format.json',
-            output_folder = 'seg',
             segmentations_folder='seg',
-            pred_json = 'pred.json',
             gt_json = './datasets/annotations/panoptic_val2017.json',
             gt_folder = './datasets/annotations/panoptic_val2017',
             **kwarags):
-            self.img_info_file_folder = img_info_file_folder
-            self.output_folder =output_folder
-            self.pred_json = pred_json
             self.gt_json = gt_json
             self.gt_folder =gt_folder
+            self.segmentations_folder=segmentations_folder
             super(CocoDataset_plus,self).__init__(**kwarags)
     def load_annotations(self, ann_file):
         """Load annotation from COCO style annotation file.
@@ -426,21 +420,13 @@ class CocoDataset_plus(CustomDataset):
 
         metrics = metric if isinstance(metric, list) else [metric]
 
-       
-
+        eval_results = OrderedDict()
         if 'panoptic' in metrics:
-            print_log('Eval  panoptic metrics of coco.', logger=logger)
-            print_log('The eval pipeline has 2 steps: 1.convert 2channels format to 3channels panoptic format.\n 2 eval with panopticapi', logger=logger)
+           
             assert 'panoptic' in results.keys()
-            panoptic_result = results['panoptic']
-            converter_memory(
-                self.img_info_file_folder,
-                panoptic_result,
-                PAN,
-                self.output_folder,
-                self.pred_json,
-            )
-            pq_compute(self.gt_json,self.pred_json, self.gt_folder, self.output_folder,logger=logger)
+            panoptic_result = results['panoptic'] 
+            results_pq = pq_compute2(self.gt_json,panoptic_result, self.gt_folder, self.segmentations_folder,logger=logger)
+            eval_results.update(results_pq) 
             metrics = [metric for metric in metrics if metric !='panoptic']
         
         if 'bbox' in results.keys() and 'segm' not in results.keys():
@@ -462,7 +448,7 @@ class CocoDataset_plus(CustomDataset):
         
         result_files, tmp_dir = self.format_results(results, jsonfile_prefix)
 
-        eval_results = OrderedDict()
+        
         cocoGt = self.coco
         for metric in metrics:
             msg = f'Evaluating {metric}...'
@@ -606,7 +592,7 @@ class CocoDataset_plus(CustomDataset):
         if tmp_dir is not None:
             tmp_dir.cleanup()
         return eval_results
-PAN =[
+id_and_category_maps =[
     {
         "supercategory": "person",
         "color": [

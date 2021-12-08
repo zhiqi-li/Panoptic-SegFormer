@@ -88,8 +88,8 @@ model = dict(
         loss_bbox=dict(type='L1Loss', loss_weight=5.0),
         loss_iou=dict(type='GIoULoss', loss_weight=2.0),
         loss_mask=dict(type='DiceLoss', loss_weight=2.0),
-        transformer_head=dict(type='MaskHead',d_model=_dim_,nhead=8,num_decoder_layers=4),
-        transformer_head2=dict(type='MaskHead',d_model=_dim_,nhead=8,num_decoder_layers=6,self_attn=True),
+        thing_transformer_head=dict(type='MaskHead',d_model=_dim_,nhead=8,num_decoder_layers=4),
+        stuff_transformer_head=dict(type='MaskHead',d_model=_dim_,nhead=8,num_decoder_layers=6,self_attn=True),
         ),
     # training and testing settings
     train_cfg=dict(
@@ -99,7 +99,7 @@ model = dict(
             reg_cost=dict(type='BBoxL1Cost', weight=5.0, box_format='xywh'),
             iou_cost=dict(type='IoUCost', iou_mode='giou', weight=2.0),
             ),
-        assigner_w_mask=dict(
+        assigner_with_mask=dict(
             type='HungarianAssigner_multi_info',
             cls_cost=dict(type='FocalLossCost', weight=2.0),
             reg_cost=dict(type='BBoxL1Cost', weight=5.0, box_format='xywh'),
@@ -107,7 +107,7 @@ model = dict(
             mask_cost=dict(type='DiceCost', weight=2.0),
             ),
         sampler =dict(type='PseudoSampler'),    
-        sampler_w_mask =dict(type='PseudoSampler_segformer'),    
+        sampler_with_mask =dict(type='PseudoSampler_segformer'),    
         ),
     test_cfg=dict(max_per_img=100))
 img_norm_cfg = dict(

@@ -14,7 +14,7 @@ model = dict(
         in_channels=[128, 320, 512], 
      ),
     bbox_head=dict(
-        thre1=0.3,
-        thre2=0.3,
+        quality_threshold_things=0.3,
+        quality_threshold_stuff=0.3,
     )
 )

@@ -61,7 +61,7 @@ model = dict(
                 type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
             loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
         mask_roi_extractor=None,
-        mask_head=dict(
+        things_mask_head=dict(
             type='FCNMaskHead',
             num_convs=0,
             in_channels=2048,

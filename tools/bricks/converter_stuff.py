@@ -167,14 +167,14 @@ def convert_panoptic_to_detection_coco_format_single_core(
             )
         except IOError:
             raise KeyError('no prediction png file for id: {}'.format(annotation['image_id']))
-        pan = pan_format
+        id_and_category_maps = pan_format
         
-        print(set(pan))
+        print(set(id_and_category_maps))
 
 
         for segm_info in annotation['segments_info']:
             
-            mask = (pan == segm_info['id']).astype(np.uint8)
+            mask = (id_and_category_maps == segm_info['id']).astype(np.uint8)
             segm_info.pop('id')
             _mask = np.expand_dims(mask, axis=2)
             

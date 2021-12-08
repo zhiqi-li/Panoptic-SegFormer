@@ -98,7 +98,7 @@ model = dict(
             roi_layer=dict(type='RoIAlign', output_size=14, sampling_ratio=0),
             out_channels=256,
             featmap_strides=[4, 8, 16, 32]),
-        mask_head=dict(
+        things_mask_head=dict(
             type='FCNMaskHead',
             num_convs=4,
             in_channels=256,

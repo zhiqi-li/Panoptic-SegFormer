@@ -10,7 +10,7 @@ from mmdet.models.builder import DETECTORS, build_backbone, build_head, build_ne
 import mmcv
 from torch.utils.checkpoint import checkpoint
 @DETECTORS.register_module()
-class SingleStageDetector_w_mask(BaseDetector):
+class SingleStagePanopticDetector(BaseDetector):
     """Base class for single-stage detectors.
 
     Single-stage detectors directly and densely predict bounding boxes on the
@@ -28,7 +28,7 @@ class SingleStageDetector_w_mask(BaseDetector):
                  init_cfg=None,
                  with_checkpoint =False):
         
-        super(SingleStageDetector_w_mask, self).__init__(init_cfg)
+        super(SingleStagePanopticDetector, self).__init__(init_cfg)
         self.fp16_enabled = False
         backbone.pretrained = pretrained
         self.backbone = build_backbone(backbone)
@@ -92,7 +92,7 @@ class SingleStageDetector_w_mask(BaseDetector):
         for img_meta in img_metas:
             img_meta['batch_input_shape'] = batch_input_shape
         #img_metas[0]['img'] = img
-        #super(SingleStageDetector_w_mask, self).forward_train(img, img_metas)
+        #super(SingleStagePanopticDetector, self).forward_train(img, img_metas)
         if self.with_checkpoint:
             img.requires_grad_(True)
             x = checkpoint(self.extract_feat,img)

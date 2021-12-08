@@ -16,7 +16,7 @@ from mmdet.apis import set_random_seed, train_detector
 from mmdet.datasets import build_dataset
 from mmdet.models import build_detector
 from mmdet.utils import collect_env, get_root_logger
-from easymd.apis.train import train_detector_plus2
+from easymd.apis.train import train_detector_plus
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
@@ -188,7 +188,7 @@ def main():
     # add an attribute for visualization convenience
     model.CLASSES = datasets[0].CLASSES
     
-    train_detector_plus2(
+    train_detector_plus(
         model,
         datasets,
         cfg,

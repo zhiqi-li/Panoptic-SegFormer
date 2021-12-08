@@ -15,17 +15,14 @@ from collections import defaultdict
 import time
 import numpy as np
 from easymd.datasets.panopticapi.utils import get_traceback, IdGenerator, id2rgb, rgb2id, save_json
-from easymd.datasets.coco import PAN as coco_categories_dict
-from easymd.datasets.cityscapes_panoptic import PAN as cityscapes_categories_dict
-from easymd.datasets.ade_panoptic import PAN as ade20k_categories_dict
-from easymd.datasets.mapillary_panoptic import PAN as mapillary_categories_dict
+from easymd.datasets.coco_plus import id_and_category_maps as coco_categories_dict
 import os
 import PIL.Image as Image
 import json
-try:
-    from detectron2.data import MetadataCatalog
-except:
-    print('no detectron2')
+#try:
+#    from detectron2.data import MetadataCatalog
+#except:
+#    print('no detectron2')
 #from detectron2.utils.visualizer import Visualizer
 from easymd.models.utils.visual import Visualizer # we modified the Visualizer from detectron2
 def single_gpu_test_plus(model,
@@ -85,69 +82,10 @@ def single_gpu_test_plus(model,
     return results
 
 
-def multi_gpu_test_plus(model, data_loader, tmpdir=None, gpu_collect=False):
-    """Test model with multiple gpus.
-
-    This method tests model with multiple gpus and collects the results
-    under two different modes: gpu and cpu modes. By setting 'gpu_collect=True'
-    it encodes results to gpu tensors and use gpu communication for results
-    collection. On cpu mode it saves the results on different gpus to 'tmpdir'
-    and collects them by the rank 0 worker.
-
-    Args:
-        model (nn.Module): Model to be tested.
-        data_loader (nn.Dataloader): Pytorch data loader.
-        tmpdir (str): Path of directory to save the temporary results from
-            different gpus under cpu mode.
-        gpu_collect (bool): Option to use either gpu or cpu to collect results.
-
-    Returns:
-        list: The prediction results.
-    """
-    model.eval()
-    results = {'bbox':[],'segm':[],'panoptic':[]}
-    dataset = data_loader.dataset
-    rank, world_size = get_dist_info()
-    if rank == 0:
-        prog_bar = mmcv.ProgressBar(len(dataset))
-    time.sleep(2)  # This line can prevent deadlock problem in some cases.
-    for i, data in enumerate(data_loader):
-        with torch.no_grad():
-            result = model(return_loss=False, rescale=True, **data)
-            # encode mask results
-
-            assert isinstance(result,dict)
-        if 'bbox' in result.keys():
-            results['bbox'].extend([bbox for bbox in result['bbox']])
-        if 'segm' in result.keys():
-            results['segm'].extend([encode_mask_results(segm) for segm in result['segm']])
-        if 'panoptic' in results.keys():
-            results['panoptic'].extend([panoptic for panoptic in result['panoptic']])
-
-        if rank == 0:
-            batch_size = len(result[list(result.keys())[0]])
-            for _ in range(batch_size * world_size):
-                prog_bar.update()
-
-    # collect results from all ranks
-    gpu_collect = False
-    if tmpdir is None: 
-        tmpdir = './tmp'
-    if gpu_collect:
-        results['bbox'] = collect_results_gpu_plus(results['bbox'], len(dataset))
-        results['segm'] = collect_results_gpu_plus(results['segm'], len(dataset))
-        results['panoptic'] = collect_results_gpu_plus(results['panoptic'], len(dataset))
-    else:
-        if 'bbox' in results.keys(): results['bbox'] = collect_results_cpu_plus(results['bbox'], len(dataset), tmpdir+'_bbox')
-        if 'segm' in results.keys(): results['segm'] = collect_results_cpu_plus(results['segm'], len(dataset), tmpdir+'_segm')
-        if 'panoptic' in results.keys(): results['panoptic'] = collect_results_cpu_plus(results['panoptic'], len(dataset), tmpdir+'_panoptic')
-    #print(results,gpu_collect)
-    return results
-
 
 OFFSET = 1000
 VOID=0
-def multi_gpu_test_plus2(model, data_loader,datasets='coco',segmentations_folder=None, tmpdir=None, gpu_collect=False):
+def multi_gpu_test_plus(model, data_loader,datasets='coco',segmentations_folder=None, tmpdir=None, gpu_collect=False):
     """Test model with multiple gpus.
 
     This method tests model with multiple gpus and collects the results
@@ -167,17 +105,10 @@ def multi_gpu_test_plus2(model, data_loader,datasets='coco',segmentations_folder
         list: The prediction results.
     """
     model.eval()
-    print(datasets)
     if datasets == 'coco':
         categories_dict = coco_categories_dict
-    elif datasets == 'cityscapes':
-        categories_dict = cityscapes_categories_dict
-    elif datasets == 'ade20k':
-        categories_dict = ade20k_categories_dict
-        global VOID
-        VOID = 151
-    elif datasets == 'mapillary':
-        categories_dict = mapillary_categories_dict
+    else:
+        assert False
     categories = {el['id']: el for el in categories_dict}
     
     if segmentations_folder==None:
@@ -204,14 +135,14 @@ def multi_gpu_test_plus2(model, data_loader,datasets='coco',segmentations_folder
             annotations = []
             for panoptic_result in result['panoptic']:
                 original_format, file_name,shape = panoptic_result
-                pan = OFFSET * original_format[:, :, 0] + original_format[:, :, 1]
+                id_and_category_maps = OFFSET * original_format[:, :, 0] + original_format[:, :, 1]
                 pan_format = np.zeros((original_format.shape[0], original_format.shape[1], 3), dtype=np.uint8)
                 #results['panoptic'].extend([panoptic for panoptic in result['panoptic']]) 
                 id_generator = IdGenerator(categories)
 
-                if datasets == 'ade20k':
-                    pan_format[:,:,0] = 151
-                l = np.unique(pan)
+                #if datasets == 'ade20k':
+                #    pan_format[:,:,0] = 151
+                l = np.unique(id_and_category_maps)
                 segm_info = []
                 for el in l:
                     sem = el // OFFSET
@@ -220,7 +151,7 @@ def multi_gpu_test_plus2(model, data_loader,datasets='coco',segmentations_folder
                         continue
                     if sem not in categories:
                         raise KeyError('Unknown semantic label {}'.format(sem))
-                    mask = pan == el
+                    mask = id_and_category_maps == el
                     
                     segment_id, color = id_generator.get_id_and_color(sem)
                    
@@ -247,14 +178,14 @@ def multi_gpu_test_plus2(model, data_loader,datasets='coco',segmentations_folder
                 pan_format = pan_format[:,:,::-1]   ## note this 
                 
                 mmcv.imwrite(pan_format,os.path.join(segmentations_folder, file_name+suffix))
+                '''
                 detectron2_show = False
                 if detectron2_show:
                     #print(data['img_metas'][0].data[0][0])
                     #print(segm_info)
                     try:
                         im = Image.open(data['img_metas'][0].data[0][0]['filename'])
-                        meta = MetadataCatalog.get("coco_2017_val_panoptic_separated")
-                    
+                        meta = MetadataCatalog.get("coco_2017_val_panoptic_separated") 
                         im = np.array(im)[:, :, ::-1]
                         v = Visualizer(im, meta, scale=1.0)
                         v._default_font_size = 10
@@ -262,7 +193,7 @@ def multi_gpu_test_plus2(model, data_loader,datasets='coco',segmentations_folder
                         mmcv.imwrite(v.get_image(),os.path.join(segmentations_folder+'2', file_name+'_c'+suffix))
                     except:
                         pass
-
+                '''
                 #print(pan_format.shape,os.path.join(segmentations_folder, file_name+suffix) )
                 #img = Image.fromarray(pan_format)
 

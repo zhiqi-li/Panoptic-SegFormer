@@ -1,9 +1,5 @@
 import copy
-from numpy import matrix
-from pycocotools import mask
-
 import torch
-from torch._C import device
 import torch.nn as nn
 import torch.nn.functional as F
 from mmcv.cnn import Linear, bias_init_with_prob, constant_init
@@ -11,23 +7,13 @@ from mmcv.runner import force_fp32
 import mmcv
 from mmdet.core import multi_apply
 from mmdet.models.utils.transformer import inverse_sigmoid
-# from ..builder import HEADS
-# from .detr_head import DETRHead
 from mmdet.models.builder import HEADS, build_loss
-from collections import Counter
 from mmdet.core import (bbox_cxcywh_to_xyxy, bbox_xyxy_to_cxcywh,
                         build_assigner, build_sampler, multi_apply,
                         reduce_mean)
 from mmdet.models.utils import build_transformer
-from easymd.models.utils.visual import save_tensor
-from easymd.models.utils.position_embedding import xyposEmbd2, xyposEmbd
-from torchvision.transforms.transforms import ToTensor
-
 from easymd.models.panformer import DETRHeadv2
 
-from skimage.segmentation import find_boundaries
-
-import numpy as np
 
 
 @HEADS.register_module()
@@ -46,27 +32,28 @@ class PanformerHead(DETRHeadv2):
         transformer (obj:`ConfigDict`): ConfigDict is used for building
             the Encoder and Decoder.
     """
-
     def __init__(
             self,
             *args,
             with_box_refine=False,
             as_two_stage=False,
             transformer=None,
-            thre1=0.25,
-            thre2=0.25,
-            overlap_threshold1=0.4,
-            overlap_threshold2=0.2,
+            quality_threshold_things=0.25,
+            quality_threshold_stuff=0.25,
+            overlap_threshold_things=0.4,
+            overlap_threshold_stuff=0.2,
             use_argmax=False,
             datasets='coco',  # MDS
-            transformer_head=dict(type='TransformerHead',  # mask decoder for things
-                                  d_model=256,
-                                  nhead=8,
-                                  num_decoder_layers=6),
-            transformer_head2=dict(type='TransformerHead',  # mask decoder for stuff
-                                   d_model=256,
-                                   nhead=8,
-                                   num_decoder_layers=6),
+            thing_transformer_head=dict(
+                type='TransformerHead',  # mask decoder for things
+                d_model=256,
+                nhead=8,
+                num_decoder_layers=6),
+            stuff_transformer_head=dict(
+                type='TransformerHead',  # mask decoder for stuff
+                d_model=256,
+                nhead=8,
+                num_decoder_layers=6),
             loss_mask=dict(type='DiceLoss', weight=2.0),
             train_cfg=dict(
                 assigner=dict(type='HungarianAssigner',
@@ -81,34 +68,31 @@ class PanformerHead(DETRHeadv2):
             **kwargs):
         self.with_box_refine = with_box_refine
         self.as_two_stage = as_two_stage
-        self.thre1 = thre1
-        self.thre2 = thre2
-        self.overlap_threshold1 = overlap_threshold1
-        self.overlap_threshold2 = overlap_threshold2
+        self.quality_threshold_things = quality_threshold_things
+        self.quality_threshold_stuff = quality_threshold_stuff
+        self.overlap_threshold_things = overlap_threshold_things
+        self.overlap_threshold_stuff = overlap_threshold_stuff
         self.use_argmax = use_argmax
         self.datasets = datasets
         self.fp16_enabled = False
 
-        # MDS: PAN is the category_dict
+        # MDS: id_and_category_maps is the category_dict
         if datasets == 'coco':
-            from easymd.datasets.coco_plus2 import PAN
-            self.cat_dict = PAN
-        elif datasets == 'cityscapes':
-            from easymd.datasets.cityscapes_panoptic import PAN
-            self.cat_dict = PAN
+            from easymd.datasets.coco_plus import id_and_category_maps
+            self.cat_dict = id_and_category_maps
         if self.as_two_stage:
             transformer['as_two_stage'] = self.as_two_stage
-        self.num_dec_things = transformer_head['num_decoder_layers']
-        self.num_dec_stuff = transformer_head2['num_decoder_layers']
+        self.num_dec_things = thing_transformer_head['num_decoder_layers']
+        self.num_dec_stuff = stuff_transformer_head['num_decoder_layers']
         super(PanformerHead, self).__init__(*args,
                                             transformer=transformer,
                                             train_cfg=train_cfg,
                                             **kwargs)
         if train_cfg:
-            sampler_cfg = train_cfg['sampler_w_mask']
-            self.sampler_w_mask = build_sampler(sampler_cfg, context=self)
-            assigner_cfg = train_cfg['assigner_w_mask']
-            self.assigner_w_mask = build_assigner(assigner_cfg)
+            sampler_cfg = train_cfg['sampler_with_mask']
+            self.sampler_with_mask = build_sampler(sampler_cfg, context=self)
+            assigner_cfg = train_cfg['assigner_with_mask']
+            self.assigner_with_mask = build_assigner(assigner_cfg)
             self.assigner_filter = build_assigner(
                 dict(
                     type='HungarianAssigner_filter',
@@ -117,15 +101,14 @@ class PanformerHead(DETRHeadv2):
                                   weight=5.0,
                                   box_format='xywh'),
                     iou_cost=dict(type='IoUCost', iou_mode='giou', weight=2.0),
-                    max_pos=3  # Depends on GPU memory, setting it to 1, model can be trained on 1080Ti
+                    max_pos=
+                    3  # Depends on GPU memory, setting it to 1, model can be trained on 1080Ti
                 ), )
 
         self.loss_mask = build_loss(loss_mask)
-        self.mask_head = build_transformer(transformer_head)
-        self.mask_head2 = build_transformer(transformer_head2)
-        self.query_result = [[[], [], []] for i in range(301)]
+        self.things_mask_head = build_transformer(thing_transformer_head)
+        self.stuff_mask_head = build_transformer(stuff_transformer_head)
         self.count = 0
-        self.id_map = self._get_id_map()
 
     def _init_layers(self):
         """Initialize classification branch and regression branch of head."""
@@ -160,16 +143,9 @@ class PanformerHead(DETRHeadv2):
                                                 self.embed_dims * 2)
         self.stuff_query = nn.Embedding(self.num_stuff_classes,
                                         self.embed_dims * 2)
-        self.reg_branches2 = _get_clones(reg_branch, self.num_dec_things)
-        self.cls_thing_branches = _get_clones(fc_cls, self.num_dec_things)
-        self.cls_stuff_branches = _get_clones(fc_cls_stuff, self.num_dec_stuff)
-
-    def _get_id_map(self):
-        id_map = {}
-        for each in self.cat_dict:
-            id_map[each['id']] = each['isthing']
-
-        return id_map
+        self.reg_branches2 = _get_clones(reg_branch, self.num_dec_things) # used in mask decoder
+        self.cls_thing_branches = _get_clones(fc_cls, self.num_dec_things) # used in mask decoder
+        self.cls_stuff_branches = _get_clones(fc_cls_stuff, self.num_dec_stuff) # used in mask deocder
 
     def init_weights(self):
         """Initialize weights of the DeformDETR head."""
@@ -192,7 +168,7 @@ class PanformerHead(DETRHeadv2):
             for m in self.reg_branches:
                 nn.init.constant_(m[-1].bias.data[2:], 0.0)
 
-    @force_fp32(apply_to=('mlvl_feats',))
+    @force_fp32(apply_to=('mlvl_feats', ))
     def forward(self, mlvl_feats, img_metas=None):
         """Forward function.
 
@@ -220,15 +196,7 @@ class PanformerHead(DETRHeadv2):
         """
 
         batch_size = mlvl_feats[0].size(0)
-        if img_metas == None:
-            print('batch_size', batch_size)
-            img_metas = [{
-                'batch_input_shape': (1280, 800),
-                'img_shape': (1280, 800, 3),
-                'ori_shape': (1280, 800, 3),
-                'scale_factor': 1,
-                'filename': '0000.000.png'
-            }]
+       
         input_img_h, input_img_w = img_metas[0]['batch_input_shape']
 
         img_masks = mlvl_feats[0].new_ones(
@@ -266,10 +234,12 @@ class PanformerHead(DETRHeadv2):
         memory_pos = memory_pos.permute(1, 0, 2)
 
         len_last_feat = hw_lvl[-1][0] * hw_lvl[-1][1]
-        attnention_args = (memory[:, :-len_last_feat, :],
-                           memory_mask[:, :-len_last_feat],
-                           memory_pos[:, :-len_last_feat, :], query, None,
-                           query_pos, hw_lvl)
+
+        # we should feed these to mask deocder.
+        args_tuple = (memory[:, :-len_last_feat, :],
+                      memory_mask[:, :-len_last_feat],
+                      memory_pos[:, :-len_last_feat, :], query, None,
+                      query_pos, hw_lvl)
 
         hs = hs.permute(0, 2, 1, 3)
         outputs_classes = []
@@ -296,32 +266,29 @@ class PanformerHead(DETRHeadv2):
         outputs_classes = torch.stack(outputs_classes)
         outputs_coords = torch.stack(outputs_coords)
 
-        ## NOTE: if you want to compute FOLPs, uncomment the following code
-        # self.get_bboxes(outputs_classes,outputs_coords,None,None,attnention_args,reference,img_metas,True)
-
         if self.as_two_stage:
             return outputs_classes, outputs_coords, \
                    enc_outputs_class, \
-                   enc_outputs_coord.sigmoid(), attnention_args, reference
+                   enc_outputs_coord.sigmoid(), args_tuple, reference
         else:
             return outputs_classes, outputs_coords, \
-                   None, None, attnention_args, reference
+                   None, None, args_tuple, reference
 
     @force_fp32(apply_to=('all_cls_scores_list', 'all_bbox_preds_list',
-                          'attnention_args', 'reference'))
+                          'args_tuple', 'reference'))
     def loss(
-            self,
-            all_cls_scores,
-            all_bbox_preds,
-            enc_cls_scores,
-            enc_bbox_preds,
-            attnention_args,
-            reference,
-            gt_bboxes_list,
-            gt_labels_list,
-            gt_masks_list=None,
-            img_metas=None,
-            gt_bboxes_ignore=None,
+        self,
+        all_cls_scores,
+        all_bbox_preds,
+        enc_cls_scores,
+        enc_bbox_preds,
+        args_tuple,
+        reference,
+        gt_bboxes_list,
+        gt_labels_list,
+        gt_masks_list=None,
+        img_metas=None,
+        gt_bboxes_ignore=None,
     ):
         """"Loss function.
 
@@ -340,7 +307,7 @@ class PanformerHead(DETRHeadv2):
             enc_bbox_preds (Tensor): Regression results of each points
                 on the encode feature map, has shape (N, h*w, 4). Only be
                 passed when as_two_stage is True, otherwise is None.
-            attnention_args (Tuple) several args
+            args_tuple (Tuple) several args
             reference (Tensor) reference from location decoder
             gt_bboxes_list (list[Tensor]): Ground truth bboxes for each image
                 with shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format.
@@ -363,7 +330,8 @@ class PanformerHead(DETRHeadv2):
         gt_things_masks_list = []
         gt_stuff_labels_list = []
         gt_stuff_masks_list = []
-        for i, each in enumerate(gt_labels_list):
+        
+        for i, each in enumerate(gt_labels_list):   
             # MDS: for coco, id<80 (Continuous id) is things. This is not true for other data sets
             things_selected = each < self.num_things_classes
 
@@ -389,13 +357,14 @@ class PanformerHead(DETRHeadv2):
         ]
         img_metas_list = [img_metas for _ in range(num_dec_layers - 1)]
 
+        # if the location decoder codntains L layers, we compute the losses of the first L-1 layers
         losses_cls, losses_bbox, losses_iou = multi_apply(
             self.loss_single, all_cls_scores[:-1], all_bbox_preds[:-1],
             all_gt_bboxes_list, all_gt_labels_list, img_metas_list,
             all_gt_bboxes_ignore_list)
 
-        losses_cls_f, losses_bbox_f, losses_iou_f, losses_masks_things_f, losses_masks_stuff_f, loss_mask_things_list_f, loss_mask_stuff_list_f, loss_iou_list_f, loss_bbox_list_f, loss_cls_list_f, loss_cls_stuff_list_f, things_ratio, stuff_ratio = self.loss_single_w_mask(
-            all_cls_scores[-1], all_bbox_preds[-1], attnention_args, reference,
+        losses_cls_f, losses_bbox_f, losses_iou_f, losses_masks_things_f, losses_masks_stuff_f, loss_mask_things_list_f, loss_mask_stuff_list_f, loss_iou_list_f, loss_bbox_list_f, loss_cls_list_f, loss_cls_stuff_list_f, things_ratio, stuff_ratio = self.loss_single_panoptic(
+            all_cls_scores[-1], all_bbox_preds[-1], args_tuple, reference,
             gt_things_bboxes_list, gt_things_lables_list, gt_things_masks_list,
             (gt_stuff_labels_list, gt_stuff_masks_list), img_metas,
             gt_bboxes_ignore)
@@ -425,15 +394,15 @@ class PanformerHead(DETRHeadv2):
         num_dec_layer = 0
         for i in range(len(loss_mask_things_list_f)):
             loss_dict[f'd{i}.loss_mask_things_f'] = loss_mask_things_list_f[
-                                                        i] * things_ratio
+                i] * things_ratio
             loss_dict[f'd{i}.loss_iou_f'] = loss_iou_list_f[i] * things_ratio
             loss_dict[f'd{i}.loss_bbox_f'] = loss_bbox_list_f[i] * things_ratio
             loss_dict[f'd{i}.loss_cls_f'] = loss_cls_list_f[i] * things_ratio
         for i in range(len(loss_mask_stuff_list_f)):
             loss_dict[f'd{i}.loss_mask_stuff_f'] = loss_mask_stuff_list_f[
-                                                       i] * stuff_ratio
+                i] * stuff_ratio
             loss_dict[f'd{i}.loss_cls_stuff_f'] = loss_cls_stuff_list_f[
-                                                      i] * stuff_ratio
+                i] * stuff_ratio
         for loss_cls_i, loss_bbox_i, loss_iou_i in zip(
                 losses_cls,
                 losses_bbox,
@@ -448,6 +417,8 @@ class PanformerHead(DETRHeadv2):
         # print(loss_dict)
         return loss_dict
 
+
+    
     def filter_query(self,
                      cls_scores_list,
                      bbox_preds_list,
@@ -455,6 +426,9 @@ class PanformerHead(DETRHeadv2):
                      gt_labels_list,
                      img_metas,
                      gt_bboxes_ignore_list=None):
+        '''
+        This function aims to using the cost from the location decoder to filter out low-quality queries.
+        '''
         assert gt_bboxes_ignore_list is None, \
             'Only supports for gt_bboxes_ignore setting to None.'
         num_imgs = len(cls_scores_list)
@@ -465,8 +439,8 @@ class PanformerHead(DETRHeadv2):
         (pos_inds_mask_list, neg_inds_mask_list, labels_list,
          label_weights_list, bbox_targets_list,
          bbox_weights_list, pos_inds_list, neg_inds_list) = multi_apply(
-            self._filter_query_single, cls_scores_list, bbox_preds_list,
-            gt_bboxes_list, gt_labels_list, img_metas, gt_bboxes_ignore_list)
+             self._filter_query_single, cls_scores_list, bbox_preds_list,
+             gt_bboxes_list, gt_labels_list, img_metas, gt_bboxes_ignore_list)
         num_total_pos = sum((inds.numel() for inds in pos_inds_list))
         num_total_neg = sum((inds.numel() for inds in neg_inds_list))
 
@@ -489,7 +463,7 @@ class PanformerHead(DETRHeadv2):
         pos_inds = sampling_result.pos_inds
         neg_inds = sampling_result.neg_inds
         # label targets
-        labels = gt_bboxes.new_full((num_bboxes,),
+        labels = gt_bboxes.new_full((num_bboxes, ),
                                     self.num_things_classes,
                                     dtype=torch.long)
         labels[pos_inds] = gt_labels[sampling_result.pos_assigned_gt_inds]
@@ -513,16 +487,15 @@ class PanformerHead(DETRHeadv2):
         return (pos_ind_mask, neg_ind_mask, labels, label_weights,
                 bbox_targets, bbox_weights, pos_inds, neg_inds)
 
-    def get_targets_w_mask(self,
-                           cls_scores_list,
-                           bbox_preds_list,
-                           masks_preds_list_thing,
-                           gt_bboxes_list,
-                           gt_labels_list,
-                           gt_masks_list,
-                           img_metas,
-                           gt_bboxes_ignore_list=None):
-
+    def get_targets_with_mask(self,
+                              cls_scores_list,
+                              bbox_preds_list,
+                              masks_preds_list_thing,
+                              gt_bboxes_list,
+                              gt_labels_list,
+                              gt_masks_list,
+                              img_metas,
+                              gt_bboxes_ignore_list=None):
         """"Compute regression and classification targets for a batch image.
 
         Outputs from a single decoder layer of a single feature level are used.
@@ -552,10 +525,10 @@ class PanformerHead(DETRHeadv2):
 
         (labels_list, label_weights_list, bbox_targets_list, bbox_weights_list,
          mask_targets_list, mask_weights_list, pos_inds_list,
-         neg_inds_list) = multi_apply(self._get_target_single_w_mask,
-                                      cls_scores_list, bbox_preds_list, masks_preds_list_thing,
-                                      gt_bboxes_list, gt_labels_list,
-                                      gt_masks_list, img_metas,
+         neg_inds_list) = multi_apply(self._get_target_single_with_mask,
+                                      cls_scores_list, bbox_preds_list,
+                                      masks_preds_list_thing, gt_bboxes_list,
+                                      gt_labels_list, gt_masks_list, img_metas,
                                       gt_bboxes_ignore_list)
         num_total_pos_thing = sum((inds.numel() for inds in pos_inds_list))
         num_total_neg_thing = sum((inds.numel() for inds in neg_inds_list))
@@ -563,15 +536,15 @@ class PanformerHead(DETRHeadv2):
                 bbox_weights_list, mask_targets_list, mask_weights_list,
                 num_total_pos_thing, num_total_neg_thing, pos_inds_list)
 
-    def _get_target_single_w_mask(self,
-                                  cls_score,
-                                  bbox_pred,
-                                  masks_preds_things,
-                                  gt_bboxes,
-                                  gt_labels,
-                                  gt_masks,
-                                  img_meta,
-                                  gt_bboxes_ignore=None):
+    def _get_target_single_with_mask(self,
+                                     cls_score,
+                                     bbox_pred,
+                                     masks_preds_things,
+                                     gt_bboxes,
+                                     gt_labels,
+                                     gt_masks,
+                                     img_meta,
+                                     gt_bboxes_ignore=None):
         """
         """
 
@@ -580,16 +553,18 @@ class PanformerHead(DETRHeadv2):
 
         gt_masks = gt_masks.float()
 
-        assign_result = self.assigner_w_mask.assign(bbox_pred, cls_score, masks_preds_things,
-                                                    gt_bboxes, gt_labels, gt_masks,
-                                                    img_meta, gt_bboxes_ignore)
-        sampling_result = self.sampler_w_mask.sample(assign_result, bbox_pred,
-                                                     gt_bboxes, gt_masks)
+        assign_result = self.assigner_with_mask.assign(bbox_pred, cls_score,
+                                                       masks_preds_things,
+                                                       gt_bboxes, gt_labels,
+                                                       gt_masks, img_meta,
+                                                       gt_bboxes_ignore)
+        sampling_result = self.sampler_with_mask.sample(
+            assign_result, bbox_pred, gt_bboxes, gt_masks)
         pos_inds = sampling_result.pos_inds
         neg_inds = sampling_result.neg_inds
 
         # label targets
-        labels = gt_bboxes.new_full((num_bboxes,),
+        labels = gt_bboxes.new_full((num_bboxes, ),
                                     self.num_things_classes,
                                     dtype=torch.long)
         labels[pos_inds] = gt_labels[sampling_result.pos_assigned_gt_inds]
@@ -620,53 +595,17 @@ class PanformerHead(DETRHeadv2):
         return (labels, label_weights, bbox_targets, bbox_weights, mask_target,
                 mask_weights, pos_inds, neg_inds)
 
-    def loss_single_w_mask(self,
-                           cls_scores,
-                           bbox_preds,
-                           attnention_args,
-                           reference,
-                           gt_bboxes_list,
-                           gt_labels_list,
-                           gt_masks_list,
-                           gt_panoptic_list,
-                           img_metas,
-                           gt_bboxes_ignore_list=None):
-        """"Loss function for outputs from a single decoder layer of a single
-        feature level.
+    def get_filter_results_and_loss(self, cls_scores, bbox_preds,
+                                    cls_scores_list, bbox_preds_list,
+                                    gt_bboxes_list, gt_labels_list, img_metas,
+                                    gt_bboxes_ignore_list):
 
-        Args:
-            cls_scores (Tensor): Box score logits from a single decoder layer
-                for all images. Shape [bs, num_query, cls_out_channels].
-            bbox_preds (Tensor): Sigmoid outputs from a single decoder layer
-                for all images, with normalized coordinate (cx, cy, w, h) and
-                shape [bs, num_query, 4].
-            attnention_args:
-            reference:
-            gt_bboxes_list (list[Tensor]): Ground truth bboxes for each image
-                with shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format.
-            gt_labels_list (list[Tensor]): Ground truth class indices for each
-                image with shape (num_gts, ).
-            img_metas (list[dict]): List of image meta information.
-            gt_bboxes_ignore_list (list[Tensor], optional): Bounding
-                boxes which can be ignored for each image. Default None.
-
-        Returns:
-            dict[str, Tensor]: A dictionary of loss components for outputs from
-                a single decoder layer.
-        """
-        num_imgs = cls_scores.size(0)
-        # BS,NQ,H,W = masks_preds.shape
-
-        gt_stuff_labels_list, gt_stuff_masks_list = gt_panoptic_list
-        cls_scores_list = [cls_scores[i] for i in range(num_imgs)]
-        bbox_preds_list = [bbox_preds[i] for i in range(num_imgs)]
 
         pos_inds_mask_list, neg_inds_mask_list, labels_list, label_weights_list, bbox_targets_list, \
         bbox_weights_list, num_total_pos_thing, num_total_neg_thing, pos_inds_list, neg_inds_list = self.filter_query(
             cls_scores_list, bbox_preds_list,
             gt_bboxes_list, gt_labels_list,
             img_metas, gt_bboxes_ignore_list)
-
         labels = torch.cat(labels_list, 0)
         label_weights = torch.cat(label_weights_list, 0)
         bbox_targets = torch.cat(bbox_targets_list, 0)
@@ -700,14 +639,14 @@ class PanformerHead(DETRHeadv2):
             img_h, img_w, _ = img_meta['img_shape']
             factor = bbox_pred.new_tensor([img_w, img_h, img_w,
                                            img_h]).unsqueeze(0).repeat(
-                bbox_pred.size(0), 1)
+                                               bbox_pred.size(0), 1)
             factors.append(factor)
         factors = torch.cat(factors, 0)
 
         # DETR regress the relative position of boxes (cxcywh) in the image,
         # thus the learning target is normalized by the image size. So here
         # we need to re-scale them for calculating IoU loss
-        BS, NQ, L = bbox_preds.shape
+        
         bbox_preds = bbox_preds.reshape(-1, 4)
         bboxes = bbox_cxcywh_to_xyxy(bbox_preds) * factors
         bboxes_gt = bbox_cxcywh_to_xyxy(bbox_targets) * factors
@@ -723,8 +662,51 @@ class PanformerHead(DETRHeadv2):
                                    bbox_targets,
                                    bbox_weights,
                                    avg_factor=num_total_pos_thing)
+        return loss_cls, loss_iou, loss_bbox,\
+            pos_inds_mask_list, num_total_pos_thing
 
-        memory, memory_mask, memory_pos, query, _, query_pos, hw_lvl = attnention_args
+    def loss_single_panoptic(self,
+                             cls_scores,
+                             bbox_preds,
+                             args_tuple,
+                             reference,
+                             gt_bboxes_list,
+                             gt_labels_list,
+                             gt_masks_list,
+                             gt_panoptic_list,
+                             img_metas,
+                             gt_bboxes_ignore_list=None):
+        """"Loss function for outputs from a single decoder layer of a single
+        feature level.
+
+        Args:
+            cls_scores (Tensor): Box score logits from a single decoder layer
+                for all images. Shape [bs, num_query, cls_out_channels].
+            bbox_preds (Tensor): Sigmoid outputs from a single decoder layer
+                for all images, with normalized coordinate (cx, cy, w, h) and
+                shape [bs, num_query, 4].
+            args_tuple:
+            reference:
+            gt_bboxes_list (list[Tensor]): Ground truth bboxes for each image
+                with shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format.
+            gt_labels_list (list[Tensor]): Ground truth class indices for each
+                image with shape (num_gts, ).
+            img_metas (list[dict]): List of image meta information.
+            gt_bboxes_ignore_list (list[Tensor], optional): Bounding
+                boxes which can be ignored for each image. Default None.
+
+        Returns:
+            dict[str, Tensor]: A dictionary of loss components for outputs from
+                a single decoder layer.
+        """
+        num_imgs = cls_scores.size(0)
+        gt_stuff_labels_list, gt_stuff_masks_list = gt_panoptic_list
+        cls_scores_list = [cls_scores[i] for i in range(num_imgs)]
+        bbox_preds_list = [bbox_preds[i] for i in range(num_imgs)]
+        loss_cls, loss_iou, loss_bbox, pos_inds_mask_list, num_total_pos_thing = self.get_filter_results_and_loss(
+            cls_scores, bbox_preds, cls_scores_list, bbox_preds_list, gt_bboxes_list, gt_labels_list, img_metas, gt_bboxes_ignore_list)
+
+        memory, memory_mask, memory_pos, query, _, query_pos, hw_lvl = args_tuple
 
         BS, _, dim_query = query.shape[0], query.shape[1], query.shape[-1]
 
@@ -749,21 +731,16 @@ class PanformerHead(DETRHeadv2):
         mask_preds_inter_stuff = [[] for _ in range(self.num_dec_stuff)]
         cls_thing_preds = [[] for _ in range(self.num_dec_things)]
         cls_stuff_preds = [[] for _ in range(self.num_dec_stuff)]
-        bbox_preds = [
+        BS, NQ, L = bbox_preds.shape
+        new_bbox_preds = [
             torch.zeros([BS, len_query, L]).to(bbox_preds.device)
             for _ in range(self.num_dec_things)
         ]
 
-        mask_things, mask_inter_things, query_inter_things = self.mask_head(
-            memory,
-            memory_mask,
-            None,
-            thing_query,
-            None,
-            None,
-            hw_lvl=hw_lvl)
+        mask_things, mask_inter_things, query_inter_things = self.things_mask_head(
+            memory, memory_mask, None, thing_query, None, None, hw_lvl=hw_lvl)
 
-        mask_stuff, mask_inter_stuff, query_inter_stuff = self.mask_head2(
+        mask_stuff, mask_inter_stuff, query_inter_stuff = self.stuff_mask_head(
             memory,
             memory_mask,
             None,
@@ -789,7 +766,7 @@ class PanformerHead(DETRHeadv2):
             for j in range(self.num_dec_things):
                 tmp_i_j = mask_inter_things[j][i][:len(pos_inds_mask_list[i]
                                                        )].reshape(
-                    -1, *hw_lvl[0])
+                                                           -1, *hw_lvl[0])
                 mask_preds_inter_things[j].append(tmp_i_j)
 
                 # mask_preds_inter_things[j].append(mask_inter_things[j].reshape(-1, *hw_lvl[0]))
@@ -807,7 +784,7 @@ class PanformerHead(DETRHeadv2):
 
                 outputs_coord = tmp.sigmoid()
 
-                bbox_preds[j][i][:len(pos_inds_mask_list[i])] = outputs_coord
+                new_bbox_preds[j][i][:len(pos_inds_mask_list[i])] = outputs_coord
                 cls_thing_preds[j].append(self.cls_thing_branches[j](
                     query_things.reshape(t1 * t2, t3)))
 
@@ -844,15 +821,16 @@ class PanformerHead(DETRHeadv2):
             bbox_preds_list[i][pos_inds_mask_list[i]] for i in range(num_imgs)
         ]
 
-        gt_targets = self.get_targets_w_mask(cls_scores_list, bbox_preds_list,
-                                             masks_preds_list_thing,
-                                             gt_bboxes_list, gt_labels_list,
-                                             gt_masks_list, img_metas,
-                                             gt_bboxes_ignore_list)
+        gt_targets = self.get_targets_with_mask(cls_scores_list,
+                                                bbox_preds_list,
+                                                masks_preds_list_thing,
+                                                gt_bboxes_list, gt_labels_list,
+                                                gt_masks_list, img_metas,
+                                                gt_bboxes_ignore_list)
 
         (labels_list, label_weights_list, bbox_targets_list, bbox_weights_list,
-         mask_targets_list, mask_weights_list, _,
-         _, pos_inds_list) = gt_targets
+         mask_targets_list, mask_weights_list, _, _,
+         pos_inds_list) = gt_targets
 
         thing_labels = torch.cat(labels_list, 0)
         things_weights = torch.cat(label_weights_list, 0)
@@ -865,7 +843,7 @@ class PanformerHead(DETRHeadv2):
             img_h, img_w, _ = img_meta['img_shape']
             factor = bbox_pred.new_tensor([img_w, img_h, img_w,
                                            img_h]).unsqueeze(0).repeat(
-                bbox_pred.size(0), 1)
+                                               bbox_pred.size(0), 1)
             factors.append(factor)
         factors = torch.cat(factors, 0)
 
@@ -884,7 +862,7 @@ class PanformerHead(DETRHeadv2):
             num_total_pos_stuff += len(gt_stuff_labels_list[i])  ## all stuff
 
             select_stuff_index = gt_stuff_labels_list[
-                                     i] - self.num_things_classes
+                i] - self.num_things_classes
             mask_weight_i_stuff = torch.zeros([self.num_stuff_classes])
             mask_weight_i_stuff[select_stuff_index] = 1
             stuff_masks = torch.zeros(
@@ -956,7 +934,7 @@ class PanformerHead(DETRHeadv2):
                                              mask_weight_things,
                                              avg_factor=num_total_pos_thing)
             loss_mask_things_list.append(loss_mask_j)
-            bbox_preds_this_level = bbox_preds[j].reshape(-1, 4)
+            bbox_preds_this_level = new_bbox_preds[j].reshape(-1, 4)
             bboxes_this_level = bbox_cxcywh_to_xyxy(
                 bbox_preds_this_level) * factors
             # We let this loss be 0. We didn't predict bbox in our mask decoder. Predicting bbox in the mask decoder is basically useless
@@ -965,10 +943,11 @@ class PanformerHead(DETRHeadv2):
                                        bboxes_weights,
                                        avg_factor=num_total_pos_thing) * 0
             if bboxes_taget.shape[0] != 0:
-                loss_bbox_j = self.loss_bbox(bbox_preds_this_level,
-                                             bboxes_taget,
-                                             bboxes_weights,
-                                             avg_factor=num_total_pos_thing) * 0
+                loss_bbox_j = self.loss_bbox(
+                    bbox_preds_this_level,
+                    bboxes_taget,
+                    bboxes_weights,
+                    avg_factor=num_total_pos_thing) * 0
             else:
                 loss_bbox_j = bbox_preds_this_level.sum() * 0
             loss_iou_list.append(loss_iou_j)
@@ -999,7 +978,10 @@ class PanformerHead(DETRHeadv2):
                 loss_cls_thing_j = cls_scores.sum() * 0
             else:
                 loss_cls_thing_j = self.loss_cls(
-                    cls_scores, thing_labels, things_weights, avg_factor=num_total_pos_thing) * 2 * 0
+                    cls_scores,
+                    thing_labels,
+                    things_weights,
+                    avg_factor=num_total_pos_thing) * 2 * 0
             loss_cls_thing_list.append(loss_cls_thing_j)
 
         for j in range(len(mask_preds_inter_stuff)):
@@ -1014,12 +996,12 @@ class PanformerHead(DETRHeadv2):
 
         ## dynamic adjusting the weights
         things_ratio, stuff_ratio = num_total_pos_thing / (
-                num_total_pos_stuff + num_total_pos_thing), num_total_pos_stuff / (
-                                            num_total_pos_stuff + num_total_pos_thing)
+            num_total_pos_stuff + num_total_pos_thing), num_total_pos_stuff / (
+                num_total_pos_stuff + num_total_pos_thing)
 
         return loss_cls, loss_bbox, loss_iou, loss_mask_things, loss_mask_stuff, loss_mask_things_list, loss_mask_stuff_list, loss_iou_list, loss_bbox_list, loss_cls_thing_list, loss_cls_stuff_list, things_ratio, stuff_ratio
 
-    @force_fp32(apply_to=('x',))
+    @force_fp32(apply_to=('x', ))
     def forward_train(self,
                       x,
                       img_metas,
@@ -1081,23 +1063,23 @@ class PanformerHead(DETRHeadv2):
         return bbox_index, det_bboxes, det_labels
 
     @force_fp32(apply_to=('all_cls_scores_list', 'all_bbox_preds_list',
-                          'attnention_args'))
+                          'args_tuple'))
     def get_bboxes(
-            self,
-            all_cls_scores,
-            all_bbox_preds,
-            enc_cls_scores,
-            enc_bbox_preds,
-            attnention_args,
-            reference,
-            img_metas,
-            rescale=False,
+        self,
+        all_cls_scores,
+        all_bbox_preds,
+        enc_cls_scores,
+        enc_bbox_preds,
+        args_tuple,
+        reference,
+        img_metas,
+        rescale=False,
     ):
         """
         """
         cls_scores = all_cls_scores[-1]
         bbox_preds = all_bbox_preds[-1]
-        memory, memory_mask, memory_pos, query, _, query_pos, hw_lvl = attnention_args
+        memory, memory_mask, memory_pos, query, _, query_pos, hw_lvl = args_tuple
 
         seg_list = []
         panoptic_list = []
@@ -1121,9 +1103,9 @@ class PanformerHead(DETRHeadv2):
             ], 1)
 
             stuff_query_pos = self.stuff_query.weight[None, :,
-                              self.embed_dims:]
+                                                      self.embed_dims:]
 
-            mask_things, mask_inter_things, query_inter_things = self.mask_head(
+            mask_things, mask_inter_things, query_inter_things = self.things_mask_head(
                 memory[i:i + 1],
                 memory_mask[i:i + 1],
                 None,
@@ -1131,7 +1113,7 @@ class PanformerHead(DETRHeadv2):
                 None,
                 None,
                 hw_lvl=hw_lvl)
-            mask_stuff, mask_inter_stuff, query_inter_stuff = self.mask_head2(
+            mask_stuff, mask_inter_stuff, query_inter_stuff = self.stuff_mask_head(
                 memory[i:i + 1],
                 memory_mask[i:i + 1],
                 None,
@@ -1166,12 +1148,12 @@ class PanformerHead(DETRHeadv2):
             labels_all = torch.cat(
                 [labels, torch.arange(80, 134).to(labels.device)], 0)
 
+            ## mask wise merging
             seg_scores = (masks_all * seg_all.float()).sum(
                 (1, 2)) / sum_seg_all
-            scores_all *= (seg_scores ** 2)
+            scores_all *= (seg_scores**2)
 
             scores_all, index = torch.sort(scores_all, descending=True)
-            # scores, index = bbox[:,-1].topk(100)
 
             masks_all = masks_all[index]
             labels_all = labels_all[index]
@@ -1196,29 +1178,29 @@ class PanformerHead(DETRHeadv2):
 
             for i, scores in enumerate(scores_all):
                 # MDS: things and sutff have different threholds may perform a little bit better
-                if labels_all[i] < 80 and scores < self.thre1:
+                if labels_all[
+                        i] < 80 and scores < self.quality_threshold_things:
                     continue
-                elif labels_all[i] >= 80 and scores < self.thre2:
+                elif labels_all[
+                        i] >= 80 and scores < self.quality_threshold_stuff:
                     continue
                 _mask = masks_all[i] > 0.5
                 mask_area = _mask.sum().item()
                 intersect = _mask & (results[0] > 0)
                 intersect_area = intersect.sum().item()
                 if labels_all[i] < 80:
-                    if mask_area == 0 or (intersect_area * 1.0 /
-                                          mask_area) > self.overlap_threshold1:
+                    if mask_area == 0 or (intersect_area * 1.0 / mask_area
+                                          ) > self.overlap_threshold_things:
                         continue
                 else:
-                    if mask_area == 0 or (intersect_area * 1.0 /
-                                          mask_area) > self.overlap_threshold2:
+                    if mask_area == 0 or (intersect_area * 1.0 / mask_area
+                                          ) > self.overlap_threshold_stuff:
                         continue
                 if intersect_area > 0:
                     _mask = _mask & (results[0] == 0)
                 results[0, _mask] = self.cat_dict[labels_all[i]]['id']
                 if labels_all[i] < 80:
                     results[1, _mask] = id_unique
-                    # id_unique+=1
-                    # results[1, _mask] = id_unique
                     id_unique += 1
 
             file_name = img_metas[img_id]['filename'].split('/')[-1].split(

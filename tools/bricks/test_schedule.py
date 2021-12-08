@@ -246,9 +246,9 @@ def main(extra_args=None,checkpoint=None,path=None):
                     'depth': cfg.model.backbone.get('depth','0'),
                     'bbox_head': cfg.model.bbox_head.type,
                     'num_query':cfg.model.bbox_head.num_query,
-                    'transformer_head':cfg.model.bbox_head.transformer_head.type,
-                    #'thre1': cfg.model.bbox_head.thre1,
-                    #'thre2': cfg.model.bbox_head.thre2,
+                    'thing_transformer_head':cfg.model.bbox_head.thing_transformer_head.type,
+                    #'quality_threshold_things': cfg.model.bbox_head.quality_threshold_things,
+                    #'quality_threshold_stuff': cfg.model.bbox_head.quality_threshold_stuff,
                 }
                 init_flag = False
                 for kwarags in cfg.log_config.hooks:
@@ -299,10 +299,10 @@ if __name__ == '__main__':
     #    print(i)
     #    main(checkpoint=checkpoint)
     '''
-    for thre1 in range(2,6,1):
-        thre1/=10
-        for thre2 in range(2,6,1):
-            thre2/=10
+    for quality_threshold_things in range(2,6,1):
+        quality_threshold_things/=10
+        for quality_threshold_stuff in range(2,6,1):
+            quality_threshold_stuff/=10
             for use_argmax in [False]:
                 for t1 in range(10,31,5):
                     t1/=100
@@ -310,16 +310,16 @@ if __name__ == '__main__':
                             t2 /=100
                             main(extra_args = 
                             {
-                                'model.bbox_head.overlap_threshold1':thre1,
-                                'model.bbox_head.thre1':t1,
-                                'model.bbox_head.thre2':t2,
-                                'model.bbox_head.overlap_threshold2':thre2,
+                                'model.bbox_head.overlap_threshold_things':quality_threshold_things,
+                                'model.bbox_head.quality_threshold_things':t1,
+                                'model.bbox_head.quality_threshold_stuff':t2,
+                                'model.bbox_head.overlap_threshold_stuff':quality_threshold_stuff,
                                 'model.bbox_head.use_argmax':use_argmax})
                             args = {
-                                'model.bbox_head.overlap_threshold1':thre1,
-                                'model.bbox_head.thre1':t1,
-                                'model.bbox_head.thre2':t2,
-                                'model.bbox_head.overlap_threshold2':thre2,
+                                'model.bbox_head.overlap_threshold_things':quality_threshold_things,
+                                'model.bbox_head.quality_threshold_things':t1,
+                                'model.bbox_head.quality_threshold_stuff':t2,
+                                'model.bbox_head.overlap_threshold_stuff':quality_threshold_stuff,
                                 'model.bbox_head.use_argmax':use_argmax}
                             print(args)
        '''                 
