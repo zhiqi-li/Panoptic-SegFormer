@@ -330,17 +330,3 @@ def pq_compute2(gt_json_file, pred_json, gt_folder=None, pred_folder=None,logger
     return results
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--gt_json_file', type=str,
-                        help="JSON file with ground truth data")
-    parser.add_argument('--pred_json_file', type=str,
-                        help="JSON file with predictions data")
-    parser.add_argument('--gt_folder', type=str, default=None,
-                        help="Folder with ground turth COCO format segmentations. \
-                              Default: X if the corresponding json file is X.json")
-    parser.add_argument('--pred_folder', type=str, default=None,
-                        help="Folder with prediction COCO format segmentations. \
-                              Default: X if the corresponding json file is X.json")
-    args = parser.parse_args()
-    pq_compute(args.gt_json_file, args.pred_json_file, args.gt_folder, args.pred_folder)

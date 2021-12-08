@@ -15,7 +15,7 @@ from collections import defaultdict
 import time
 import numpy as np
 from easymd.datasets.panopticapi.utils import get_traceback, IdGenerator, id2rgb, rgb2id, save_json
-from easymd.datasets.coco_plus import id_and_category_maps as coco_categories_dict
+from easymd.datasets.coco_panoptic import id_and_category_maps as coco_categories_dict
 import os
 import PIL.Image as Image
 import json

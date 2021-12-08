@@ -1,5 +1,5 @@
 # dataset settings
-dataset_type = 'CocoDataset_plus'
+dataset_type = 'CocoDataset_panoptic'
 data_root = 'datasets/coco/'
 coco_root = 'datasets/'
 img_norm_cfg = dict(

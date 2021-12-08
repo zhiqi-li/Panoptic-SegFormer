@@ -19,7 +19,7 @@ from easymd.datasets.panopticapi import pq_compute2
 from easymd.datasets.panopticapi import converter
 
 @DATASETS.register_module()
-class CocoDataset_plus(CustomDataset):
+class CocoDataset_panoptic(CustomDataset):
 
     CLASSES = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 
         'train', 'truck', 'boat', 'traffic light', 'fire hydrant',
@@ -54,7 +54,7 @@ class CocoDataset_plus(CustomDataset):
             self.gt_json = gt_json
             self.gt_folder =gt_folder
             self.segmentations_folder=segmentations_folder
-            super(CocoDataset_plus,self).__init__(**kwarags)
+            super(CocoDataset_panoptic,self).__init__(**kwarags)
     def load_annotations(self, ann_file):
         """Load annotation from COCO style annotation file.
 

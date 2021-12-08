@@ -78,7 +78,7 @@ class PanformerHead(DETRHeadv2):
 
         # MDS: id_and_category_maps is the category_dict
         if datasets == 'coco':
-            from easymd.datasets.coco_plus import id_and_category_maps
+            from easymd.datasets.coco_panoptic import id_and_category_maps
             self.cat_dict = id_and_category_maps
         if self.as_two_stage:
             transformer['as_two_stage'] = self.as_two_stage

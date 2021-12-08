@@ -1,2 +1,2 @@
 from .panopticapi import *
-from .coco_plus import CocoDataset_plus
+from .coco_panoptic import CocoDataset_panoptic
