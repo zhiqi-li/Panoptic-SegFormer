@@ -47,8 +47,8 @@ class DistEvalHook_plus(BaseDistEvalHook):
         if tmpdir is None:
             tmpdir = osp.join(runner.work_dir, '.eval_hook')
 
-        from easymd.apis import multi_gpu_test_plus2
-        results = multi_gpu_test_plus2(
+        from easymd.apis import multi_gpu_test_plus
+        results = multi_gpu_test_plus(
             runner.model,
             self.dataloader,
             datasets = self.datasets,
